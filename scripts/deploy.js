@@ -3,9 +3,9 @@ const { ethers, upgrades } = require("hardhat");
 async function main() {
   try {
     // Deploying the initial contract
-    const Box = await ethers.getContractFactory("NFTV1");
+    const Box = await ethers.getContractFactory("ERC20V2");
 
-    const box = await upgrades.deployProxy(Box, ["0x9d1ed4379663b42FF07f36248d4f84FfCCc84251"], { kind: 'uups' });
+    const box = await upgrades.deployProxy(Box, ["0x2546BcD3c84621e976D8185a91A922aE77ECEc30"], { kind: 'uups' });
     console.log("Deploying proxy contract for Test");
 
     await box.waitForDeployment();

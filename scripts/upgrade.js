@@ -9,8 +9,9 @@ async function main() {
     console.log("Upgrade successful. New proxy address:", upgradedProxy.address);
     console.log("Upgrade proxy address same as initial:", proxyAddress);
 
-    
-  } catch (error) {
+  } 
+  
+  catch (error) {
     console.error("Upgrade failed. Error details:");
     console.error(error);
 
