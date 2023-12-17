@@ -1,6 +1,6 @@
 async function main() {
-  const proxyAddress = '0x07e03502bf3A5851E9235aebc2D86612123F7236'; // Existing UUPS proxy address
-  const BoxV2 = await ethers.getContractFactory("NFTV2");
+  const proxyAddress = '0xa27bC320252d51EEAA24BCCF6cc003979E485860'; // Existing UUPS proxy address
+  const BoxV2 = await ethers.getContractFactory("ERC20V3");
 
   console.log("Preparing upgrade...");
 

@@ -16,7 +16,9 @@ module.exports = {
   },
   networks: {
     localhost: {
-      chainId: 31337, // Set the chain ID to 31337 for your local network.
+      chainId: 31337,
+      accounts: ['0xea6c44ac03bff858b476bba40716402b03e41b8e97e276d1baec7c37d42484a0'], // Your private key here
+
      },
      songbird: {
       gas: "auto",
@@ -26,7 +28,6 @@ module.exports = {
       url: "https://sgb.ftso.com.au/ext/bc/C/rpc",
       chainId: 19,
 
-      accounts: ['0xd96076ee4237473680fc4b18da1d19508fc02ff7cf1c4c06ff0b5ace32144552'],
     },
     goerli: {
       gas: "auto",
@@ -36,7 +37,6 @@ module.exports = {
       url: "https://ethereum-goerli.publicnode.com",
       chainId: 5,
 
-      accounts: ['0xd96076ee4237473680fc4b18da1d19508fc02ff7cf1c4c06ff0b5ace32144552'],
     },
   },
 };

@@ -12,6 +12,13 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 
 contract MyToken is Initializable, ERC20Upgradeable, ERC20BurnableUpgradeable, ERC20PausableUpgradeable, OwnableUpgradeable, ERC20PermitUpgradeable, ERC20VotesUpgradeable, ERC20FlashMintUpgradeable, UUPSUpgradeable {
+    // Constants for the claim functionality
+    uint256 private constant TOKENS_PER_CLAIM = 250 * 10**18; // 250 tokens per claim
+    uint256 private constant CLAIM_INTERVAL = 1 days;
+
+    // Mapping to keep track of last claim times
+    mapping(address => uint256) private lastClaimTimes;
+
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
         _disableInitializers();
@@ -40,6 +47,12 @@ contract MyToken is Initializable, ERC20Upgradeable, ERC20BurnableUpgradeable, E
         _mint(to, amount);
     }
 
+    function claimTokens() public {
+        require(block.timestamp - lastClaimTimes[msg.sender] >= CLAIM_INTERVAL, "Claim interval not reached");
+        lastClaimTimes[msg.sender] = block.timestamp;
+        _mint(msg.sender, TOKENS_PER_CLAIM);
+    }
+
     function _authorizeUpgrade(address newImplementation)
         internal
         onlyOwner
@@ -47,7 +60,6 @@ contract MyToken is Initializable, ERC20Upgradeable, ERC20BurnableUpgradeable, E
     {}
 
     // The following functions are overrides required by Solidity.
-
     function _update(address from, address to, uint256 value)
         internal
         override(ERC20Upgradeable, ERC20PausableUpgradeable, ERC20VotesUpgradeable)

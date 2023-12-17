@@ -5,14 +5,18 @@ async function main() {
 
   console.log("Deploying StakingContract with account:", deployer.address);
 
-  // Define and assign an initial owner's Ethereum address
-  const initialOwner = "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266";
+  // Define the addresses for the rewardsToken (ERC20) and the nftCollection (ERC721)
+  const rewardsTokenAddress = "0xa27bC320252d51EEAA24BCCF6cc003979E485860"; // Replace with the actual ERC20 token address
+  const nftCollectionAddress = "0xa27bC320252d51EEAA24BCCF6cc003979E485860"; // Replace with the actual ERC721 token address
+  const initialOwner = "0x2546BcD3c84621e976D8185a91A922aE77ECEc30"; // Replace with the initial owner address
 
-  // Deploy the StakingContract with the initialOwner address
-  const StakingContract = await hre.ethers.getContractFactory("StakingContract");
-  const stakingContract = await StakingContract.deploy("0x851356ae760d987E095750cCeb3bC6014560891C", initialOwner);
-
+  // Deploy the StakingContract with the rewardsTokenAddress and nftCollectionAddress
+  const StakingContract = await hre.ethers.getContractFactory("ChaoticCreationsStaking");
+  const stakingContract = await StakingContract.deploy();
   await stakingContract.waitForDeployment();
+
+  // Initialize the contract with the specified addresses
+  await stakingContract.initialize(rewardsTokenAddress, nftCollectionAddress, initialOwner);
 
   console.log("StakingContract deployed to:", stakingContract.address);
 }

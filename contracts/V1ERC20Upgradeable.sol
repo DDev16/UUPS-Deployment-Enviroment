@@ -10,10 +10,16 @@ import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20VotesUpg
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 
-contract ERC20V2 is  Initializable, ERC20Upgradeable, ERC20BurnableUpgradeable, ERC20PausableUpgradeable, OwnableUpgradeable, ERC20PermitUpgradeable, ERC20VotesUpgradeable, UUPSUpgradeable {
+contract ERC20V3 is  Initializable, ERC20Upgradeable, ERC20BurnableUpgradeable, ERC20PausableUpgradeable, OwnableUpgradeable, ERC20PermitUpgradeable, ERC20VotesUpgradeable, UUPSUpgradeable {
      
 
-    
+      // Constants for the claim functionality
+    uint256 private constant TOKENS_PER_CLAIM = 250 * 10**18; // 250 tokens per claim
+    uint256 private constant CLAIM_INTERVAL = 1 days;
+
+    // Mapping to keep track of last claim times
+    mapping(address => uint256) private lastClaimTimes;
+
     
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
@@ -36,6 +42,15 @@ contract ERC20V2 is  Initializable, ERC20Upgradeable, ERC20BurnableUpgradeable, 
     function mint(address to, uint256 amount) public onlyOwner {
         _mint(to, amount);
     }
+
+         function claimTokens() public {
+        require(block.timestamp - lastClaimTimes[msg.sender] >= CLAIM_INTERVAL, "Claim interval not reached");
+        require(balanceOf(address(this)) >= TOKENS_PER_CLAIM, "Insufficient tokens in contract");
+        lastClaimTimes[msg.sender] = block.timestamp;
+        _transfer(address(this), msg.sender, TOKENS_PER_CLAIM);
+    }
+
+
 
     // A function for transferring ownership of the contract.
     function transferOwnership(address newOwner) public override onlyOwner {
