@@ -17,7 +17,7 @@ async function main() {
 
     // Deploying the initial ERC721 contract
     const ERC721 = await ethers.getContractFactory("NFTV1");
-    const PsychoChibis = await upgrades.deployProxy(ERC721, [ psychoGemsAddress, initialOwner ], { initializer: 'initialize', kind: 'uups' });
+    const PsychoChibis = await upgrades.deployProxy(ERC721, [ initialOwner, psychoGemsAddress ], { initializer: 'initialize', kind: 'uups' });
  
     
 
