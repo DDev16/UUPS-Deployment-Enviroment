@@ -45,7 +45,7 @@ contract NFTV2 is Initializable, ERC721Upgradeable, ERC721EnumerableUpgradeable,
     }
 
     function initialize(address initialOwner) initializer public {
-        __ERC721_init("NFTV2", "NFTV2");
+        __ERC721_init("NFTV1", "NFTV1");
         __ERC721Enumerable_init();
         __ERC721URIStorage_init();
         __ERC721Pausable_init();

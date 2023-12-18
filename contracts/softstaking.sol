@@ -101,15 +101,27 @@ contract ChaoticCreationsStaking is Initializable, OwnableUpgradeable, UUPSUpgra
     }
 
     // Function to determine the user's tier based on the number of NFTs
-    function determineTier(address user) public view returns (uint256) {
-        uint256 balance = nftCollection.balanceOf(user);
-        for (uint256 i = tiers.length; i > 0; i--) {
-            if (balance >= tiers[i - 1].minNFTs) {
-                return i - 1; // Tier index
-            }
-        }
-        return 0; // Default tier if no NFTs
+   function determineTier(address user) public view returns (uint256) {
+    uint256 balance = nftCollection.balanceOf(user);
+
+    if (balance < 1) {
+        return 0; // No NFTs
     }
+    if (balance >= 1 && balance < 6) {
+        return 1; // Tier 1
+    }
+    if (balance >= 6 && balance < 11) {
+        return 2; // Tier 2
+    }
+    if (balance >= 11 && balance < 16) {
+        return 3; // Tier 3
+    }
+    if (balance >= 16 && balance < 21) {
+        return 4; // Tier 4
+    }
+    return 5; // Tier 5 and beyond
+}
+
 
     // Function to update tier parameters (onlyOwner for security)
     function updateTier(uint256 tierIndex, uint256 minNFTs, uint256 rewardMultiplier) external onlyOwner {

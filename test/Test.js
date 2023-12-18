@@ -1,72 +1,84 @@
-import { expect, use } from 'chai';
-import { Contract } from 'ethers';
-import { deployContract, MockProvider, solidity } from 'ethereum-waffle';
+const { expect } = require("chai");
+const { ethers } = require("hardhat");
 
-use(solidity);
+describe("ChaoticCreationsStaking", function () {
+    let owner, user1, user2, rewardsToken, nftCollection, stakingContract;
 
-describe('StakingContract', function () {
-  let stakingContract;
-  let customTokenMock;
-  let owner;
-  let user;
+    beforeEach(async function () {
+        [owner, user1, user2] = await ethers.getSigners();
 
-  before(async () => {
-    [owner, user] = new MockProvider().getWallets();
+        // Deploy mock contracts for IERC20 and ERC721EnumerableUpgradeable
 
-    // Deploy the StakingContract and initialize it
-    const StakingContract = await ethers.getContractFactory('StakingContract');
-    stakingContract = await deployContract(owner, StakingContract, [owner.address]);
+        // Deploy ChaoticCreationsStaking and initialize
+    });
 
-    // Create a mock contract for the custom token
-    customTokenMock = await deployContract(owner, CustomToken, [1000]); // Adjust this to match your custom token initialization.
+    describe("Initialization", function () {
+        it("should initialize with correct values", async function () {
+            // Test initialization values
+        });
+    });
 
-    // Add the custom token mock as a supported contract
-    await stakingContract.addSupportedContract(customTokenMock.address);
-  });
+    describe("onBoardUser", function () {
+        it("should onboard a user with at least one NFT", async function () {
+            // Test successful onboarding
+        });
 
-  it('should allow a user to stake tokens', async () => {
-    // User stakes a token by interacting with the mock contract
-    await customTokenMock.mock.ownerOf.withArgs(1).returns(user.address); // Set an expectation for ownerOf
-    await expect(stakingContract.stake(customTokenMock.address, 1))
-      .to.emit(stakingContract, 'Staked')
-      .withArgs(0, user.address, customTokenMock.address, 1);
-  });
+        it("should fail to onboard a user with no NFTs", async function () {
+            // Test failure when no NFTs
+        });
+    });
 
-  it('should calculate rewards correctly', async () => {
-    // Calculate the expected reward for the user's stake
-    const expectedReward = 10; // Assuming the user's tokenId is in the first tier
+    describe("claimRewards", function () {
+        it("should allow users to claim rewards", async function () {
+            // Test successful claim
+        });
 
-    // Claim the reward
-    await expect(stakingContract.claimReward(0))
-      .to.emit(stakingContract, 'RewardClaimed')
-      .withArgs(user.address, expectedReward);
+        it("should fail for users with no NFTs", async function () {
+            // Test failure when no NFTs
+        });
 
-    // Verify the user's total rewards and staking points
-    const stakeInfo = await stakingContract.stakes(0);
-    expect(stakeInfo.totalRewards).to.equal(expectedReward);
-    expect(stakeInfo.stakingPoints).to.equal(0); // First tier staking points
-  });
+        it("should calculate rewards correctly based on tier", async function () {
+            // Test reward calculation for different tiers
+        });
 
-  it('should allow a user to spend staking points', async () => {
-    // Spend staking points
-    const amountToSpend = 5;
-    await expect(stakingContract.spendStakingPoints(0, amountToSpend))
-      .to.emit(stakingContract, 'StakingPointsSpent')
-      .withArgs(user.address, amountToSpend);
+        it("should fail if the contract has insufficient rewards", async function () {
+            // Test failure when contract has insufficient rewards
+        });
+    });
 
-    // Verify the user's remaining staking points
-    const stakeInfo = await stakingContract.stakes(0);
-    expect(stakeInfo.stakingPoints).to.equal(0);
-  });
+    describe("depositRewards", function () {
+        it("should allow the owner to deposit rewards", async function () {
+            // Test successful deposit by owner
+        });
 
-  it('should allow a user to unstake tokens', async () => {
-    // Unstake the tokens
-    await expect(stakingContract.unstake(0))
-      .to.emit(stakingContract, 'Unstaked')
-      .withArgs(0, user.address, customTokenMock.address, 1);
+        it("should prevent non-owners from depositing rewards", async function () {
+            // Test failure by non-owner
+        });
+    });
 
-    // Verify that the user's stake no longer exists
-    const stakeInfo = await stakingContract.stakes(0);
-    expect(stakeInfo.staker).to.equal(ethers.constants.AddressZero);
-  });
+    describe("withdrawRewards", function () {
+        it("should allow the owner to withdraw rewards", async function () {
+            // Test successful withdrawal by owner
+        });
+
+        it("should prevent withdrawal of more than available balance", async function () {
+            // Test failure when withdrawing more than balance
+        });
+    });
+
+    describe("Tier Management", function () {
+        it("should allow owner to update tiers", async function () {
+            // Test successful tier update by owner
+        });
+
+        it("should prevent non-owners from updating tiers", async function () {
+            // Test failure by non-owner
+        });
+
+        it("should correctly assign tiers to users based on NFT count", async function () {
+            // Test tier assignment logic
+        });
+    });
+
+    // Additional tests...
 });

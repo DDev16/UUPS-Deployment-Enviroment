@@ -7,7 +7,7 @@ async function main() {
 
   // Define the addresses for the rewardsToken (ERC20) and the nftCollection (ERC721)
   const rewardsTokenAddress = "0xa27bC320252d51EEAA24BCCF6cc003979E485860"; // Replace with the actual ERC20 token address
-  const nftCollectionAddress = "0xa27bC320252d51EEAA24BCCF6cc003979E485860"; // Replace with the actual ERC721 token address
+  const nftCollectionAddress = "0xfBECbd548B8BdA886BA45cA496C89C9227a51d4F"; // Replace with the actual ERC721 token address
   const initialOwner = "0x2546BcD3c84621e976D8185a91A922aE77ECEc30"; // Replace with the initial owner address
 
   // Deploy the StakingContract with the rewardsTokenAddress and nftCollectionAddress
