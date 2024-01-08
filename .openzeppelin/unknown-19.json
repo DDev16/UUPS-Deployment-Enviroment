@@ -15,6 +15,11 @@
       "address": "0x07e03502bf3A5851E9235aebc2D86612123F7236",
       "txHash": "0x81f81250c7427d2562aa72d69c729ed8d1b6f4086f92d5ef45c1609a9703d6cc",
       "kind": "uups"
+    },
+    {
+      "address": "0x7FC2298A352C4DFbBccb0e2bABB2c77E449b504f",
+      "txHash": "0x1e0f9ffb232b0afa64b12ff0c729eeb5f35ebca8c4914303c9f97dd89ff6d374",
+      "kind": "uups"
     }
   ],
   "impls": {
@@ -3229,6 +3234,660 @@
               "slot": "0"
             }
           ],
+          "erc7201:openzeppelin.storage.Ownable": [
+            {
+              "contract": "OwnableUpgradeable",
+              "label": "_owner",
+              "type": "t_address",
+              "src": "@openzeppelin\\contracts-upgradeable\\access\\OwnableUpgradeable.sol:24",
+              "offset": 0,
+              "slot": "0"
+            }
+          ],
+          "erc7201:openzeppelin.storage.Pausable": [
+            {
+              "contract": "PausableUpgradeable",
+              "label": "_paused",
+              "type": "t_bool",
+              "src": "@openzeppelin\\contracts-upgradeable\\utils\\PausableUpgradeable.sol:21",
+              "offset": 0,
+              "slot": "0"
+            }
+          ],
+          "erc7201:openzeppelin.storage.ERC721URIStorage": [
+            {
+              "contract": "ERC721URIStorageUpgradeable",
+              "label": "_tokenURIs",
+              "type": "t_mapping(t_uint256,t_string_storage)",
+              "src": "@openzeppelin\\contracts-upgradeable\\token\\ERC721\\extensions\\ERC721URIStorageUpgradeable.sol:25",
+              "offset": 0,
+              "slot": "0"
+            }
+          ],
+          "erc7201:openzeppelin.storage.ERC721Enumerable": [
+            {
+              "contract": "ERC721EnumerableUpgradeable",
+              "label": "_ownedTokens",
+              "type": "t_mapping(t_address,t_mapping(t_uint256,t_uint256))",
+              "src": "@openzeppelin\\contracts-upgradeable\\token\\ERC721\\extensions\\ERC721EnumerableUpgradeable.sol:21",
+              "offset": 0,
+              "slot": "0"
+            },
+            {
+              "contract": "ERC721EnumerableUpgradeable",
+              "label": "_ownedTokensIndex",
+              "type": "t_mapping(t_uint256,t_uint256)",
+              "src": "@openzeppelin\\contracts-upgradeable\\token\\ERC721\\extensions\\ERC721EnumerableUpgradeable.sol:22",
+              "offset": 0,
+              "slot": "1"
+            },
+            {
+              "contract": "ERC721EnumerableUpgradeable",
+              "label": "_allTokens",
+              "type": "t_array(t_uint256)dyn_storage",
+              "src": "@openzeppelin\\contracts-upgradeable\\token\\ERC721\\extensions\\ERC721EnumerableUpgradeable.sol:24",
+              "offset": 0,
+              "slot": "2"
+            },
+            {
+              "contract": "ERC721EnumerableUpgradeable",
+              "label": "_allTokensIndex",
+              "type": "t_mapping(t_uint256,t_uint256)",
+              "src": "@openzeppelin\\contracts-upgradeable\\token\\ERC721\\extensions\\ERC721EnumerableUpgradeable.sol:25",
+              "offset": 0,
+              "slot": "3"
+            }
+          ],
+          "erc7201:openzeppelin.storage.ERC721": [
+            {
+              "contract": "ERC721Upgradeable",
+              "label": "_name",
+              "type": "t_string_storage",
+              "src": "@openzeppelin\\contracts-upgradeable\\token\\ERC721\\ERC721Upgradeable.sol:27",
+              "offset": 0,
+              "slot": "0"
+            },
+            {
+              "contract": "ERC721Upgradeable",
+              "label": "_symbol",
+              "type": "t_string_storage",
+              "src": "@openzeppelin\\contracts-upgradeable\\token\\ERC721\\ERC721Upgradeable.sol:30",
+              "offset": 0,
+              "slot": "1"
+            },
+            {
+              "contract": "ERC721Upgradeable",
+              "label": "_owners",
+              "type": "t_mapping(t_uint256,t_address)",
+              "src": "@openzeppelin\\contracts-upgradeable\\token\\ERC721\\ERC721Upgradeable.sol:32",
+              "offset": 0,
+              "slot": "2"
+            },
+            {
+              "contract": "ERC721Upgradeable",
+              "label": "_balances",
+              "type": "t_mapping(t_address,t_uint256)",
+              "src": "@openzeppelin\\contracts-upgradeable\\token\\ERC721\\ERC721Upgradeable.sol:34",
+              "offset": 0,
+              "slot": "3"
+            },
+            {
+              "contract": "ERC721Upgradeable",
+              "label": "_tokenApprovals",
+              "type": "t_mapping(t_uint256,t_address)",
+              "src": "@openzeppelin\\contracts-upgradeable\\token\\ERC721\\ERC721Upgradeable.sol:36",
+              "offset": 0,
+              "slot": "4"
+            },
+            {
+              "contract": "ERC721Upgradeable",
+              "label": "_operatorApprovals",
+              "type": "t_mapping(t_address,t_mapping(t_address,t_bool))",
+              "src": "@openzeppelin\\contracts-upgradeable\\token\\ERC721\\ERC721Upgradeable.sol:38",
+              "offset": 0,
+              "slot": "5"
+            }
+          ],
+          "erc7201:openzeppelin.storage.Initializable": [
+            {
+              "contract": "Initializable",
+              "label": "_initialized",
+              "type": "t_uint64",
+              "src": "@openzeppelin\\contracts-upgradeable\\proxy\\utils\\Initializable.sol:69",
+              "offset": 0,
+              "slot": "0"
+            },
+            {
+              "contract": "Initializable",
+              "label": "_initializing",
+              "type": "t_bool",
+              "src": "@openzeppelin\\contracts-upgradeable\\proxy\\utils\\Initializable.sol:73",
+              "offset": 8,
+              "slot": "0"
+            }
+          ]
+        }
+      }
+    },
+    "bc4f5e74946e83e579241a67587e6797b99a291a0a9be0b750496f402f9ad03e": {
+      "address": "0xb31BC817140bA37e4670ACd1e3Cff43D2E6105C1",
+      "txHash": "0x7256884e200f52e5ddfd7dbbca1d2b59bd2b918537a29f128f3c3a0d3359ab79",
+      "layout": {
+        "solcVersion": "0.8.22",
+        "storage": [
+          {
+            "label": "_nextTokenId",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_uint256",
+            "contract": "Chibifactory1",
+            "src": "contracts\\chib2.sol:16"
+          },
+          {
+            "label": "baseURI",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_string_storage",
+            "contract": "Chibifactory1",
+            "src": "contracts\\chib2.sol:17"
+          },
+          {
+            "label": "baseExtension",
+            "offset": 0,
+            "slot": "2",
+            "type": "t_string_storage",
+            "contract": "Chibifactory1",
+            "src": "contracts\\chib2.sol:18"
+          },
+          {
+            "label": "maxSupply",
+            "offset": 0,
+            "slot": "3",
+            "type": "t_uint256",
+            "contract": "Chibifactory1",
+            "src": "contracts\\chib2.sol:19"
+          },
+          {
+            "label": "tokenTraits",
+            "offset": 0,
+            "slot": "4",
+            "type": "t_mapping(t_uint256,t_struct(Traits)14794_storage)",
+            "contract": "Chibifactory1",
+            "src": "contracts\\chib2.sol:37"
+          },
+          {
+            "label": "hatPrices",
+            "offset": 0,
+            "slot": "5",
+            "type": "t_mapping(t_enum(HatOptions)14747,t_uint256)",
+            "contract": "Chibifactory1",
+            "src": "contracts\\chib2.sol:40"
+          },
+          {
+            "label": "headPrices",
+            "offset": 0,
+            "slot": "6",
+            "type": "t_mapping(t_enum(HeadOptions)14755,t_uint256)",
+            "contract": "Chibifactory1",
+            "src": "contracts\\chib2.sol:42"
+          },
+          {
+            "label": "mouthPrices",
+            "offset": 0,
+            "slot": "7",
+            "type": "t_mapping(t_enum(MouthOptions)14758,t_uint256)",
+            "contract": "Chibifactory1",
+            "src": "contracts\\chib2.sol:44"
+          },
+          {
+            "label": "eyeColorPrices",
+            "offset": 0,
+            "slot": "8",
+            "type": "t_mapping(t_enum(EyeColorOptions)14765,t_uint256)",
+            "contract": "Chibifactory1",
+            "src": "contracts\\chib2.sol:46"
+          },
+          {
+            "label": "bodyPrices",
+            "offset": 0,
+            "slot": "9",
+            "type": "t_mapping(t_enum(BodyOptions)14770,t_uint256)",
+            "contract": "Chibifactory1",
+            "src": "contracts\\chib2.sol:48"
+          },
+          {
+            "label": "backgroundPrices",
+            "offset": 0,
+            "slot": "10",
+            "type": "t_mapping(t_enum(BackgroundOptions)14775,t_uint256)",
+            "contract": "Chibifactory1",
+            "src": "contracts\\chib2.sol:50"
+          },
+          {
+            "label": "ownsHatTrait",
+            "offset": 0,
+            "slot": "11",
+            "type": "t_mapping(t_address,t_mapping(t_enum(HatOptions)14747,t_bool))",
+            "contract": "Chibifactory1",
+            "src": "contracts\\chib2.sol:52"
+          },
+          {
+            "label": "ownsHeadTrait",
+            "offset": 0,
+            "slot": "12",
+            "type": "t_mapping(t_address,t_mapping(t_enum(HeadOptions)14755,t_bool))",
+            "contract": "Chibifactory1",
+            "src": "contracts\\chib2.sol:53"
+          },
+          {
+            "label": "ownsMouthTrait",
+            "offset": 0,
+            "slot": "13",
+            "type": "t_mapping(t_address,t_mapping(t_enum(MouthOptions)14758,t_bool))",
+            "contract": "Chibifactory1",
+            "src": "contracts\\chib2.sol:54"
+          },
+          {
+            "label": "ownsEyeColorTrait",
+            "offset": 0,
+            "slot": "14",
+            "type": "t_mapping(t_address,t_mapping(t_enum(EyeColorOptions)14765,t_bool))",
+            "contract": "Chibifactory1",
+            "src": "contracts\\chib2.sol:55"
+          },
+          {
+            "label": "ownsBodyTrait",
+            "offset": 0,
+            "slot": "15",
+            "type": "t_mapping(t_address,t_mapping(t_enum(BodyOptions)14770,t_bool))",
+            "contract": "Chibifactory1",
+            "src": "contracts\\chib2.sol:56"
+          },
+          {
+            "label": "ownsBackgroundTrait",
+            "offset": 0,
+            "slot": "16",
+            "type": "t_mapping(t_address,t_mapping(t_enum(BackgroundOptions)14775,t_bool))",
+            "contract": "Chibifactory1",
+            "src": "contracts\\chib2.sol:57"
+          },
+          {
+            "label": "erc20Token",
+            "offset": 0,
+            "slot": "17",
+            "type": "t_contract(IERC20)6075",
+            "contract": "Chibifactory1",
+            "src": "contracts\\chib2.sol:60"
+          }
+        ],
+        "types": {
+          "t_address": {
+            "label": "address",
+            "numberOfBytes": "20"
+          },
+          "t_array(t_uint256)dyn_storage": {
+            "label": "uint256[]",
+            "numberOfBytes": "32"
+          },
+          "t_bool": {
+            "label": "bool",
+            "numberOfBytes": "1"
+          },
+          "t_mapping(t_address,t_bool)": {
+            "label": "mapping(address => bool)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_address,t_mapping(t_address,t_bool))": {
+            "label": "mapping(address => mapping(address => bool))",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_address,t_mapping(t_uint256,t_uint256))": {
+            "label": "mapping(address => mapping(uint256 => uint256))",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_address,t_uint256)": {
+            "label": "mapping(address => uint256)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint256,t_address)": {
+            "label": "mapping(uint256 => address)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint256,t_string_storage)": {
+            "label": "mapping(uint256 => string)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint256,t_uint256)": {
+            "label": "mapping(uint256 => uint256)",
+            "numberOfBytes": "32"
+          },
+          "t_string_storage": {
+            "label": "string",
+            "numberOfBytes": "32"
+          },
+          "t_struct(ERC721EnumerableStorage)427_storage": {
+            "label": "struct ERC721EnumerableUpgradeable.ERC721EnumerableStorage",
+            "members": [
+              {
+                "label": "_ownedTokens",
+                "type": "t_mapping(t_address,t_mapping(t_uint256,t_uint256))",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "_ownedTokensIndex",
+                "type": "t_mapping(t_uint256,t_uint256)",
+                "offset": 0,
+                "slot": "1"
+              },
+              {
+                "label": "_allTokens",
+                "type": "t_array(t_uint256)dyn_storage",
+                "offset": 0,
+                "slot": "2"
+              },
+              {
+                "label": "_allTokensIndex",
+                "type": "t_mapping(t_uint256,t_uint256)",
+                "offset": 0,
+                "slot": "3"
+              }
+            ],
+            "numberOfBytes": "128"
+          },
+          "t_struct(ERC721Storage)371_storage": {
+            "label": "struct ERC721Upgradeable.ERC721Storage",
+            "members": [
+              {
+                "label": "_name",
+                "type": "t_string_storage",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "_symbol",
+                "type": "t_string_storage",
+                "offset": 0,
+                "slot": "1"
+              },
+              {
+                "label": "_owners",
+                "type": "t_mapping(t_uint256,t_address)",
+                "offset": 0,
+                "slot": "2"
+              },
+              {
+                "label": "_balances",
+                "type": "t_mapping(t_address,t_uint256)",
+                "offset": 0,
+                "slot": "3"
+              },
+              {
+                "label": "_tokenApprovals",
+                "type": "t_mapping(t_uint256,t_address)",
+                "offset": 0,
+                "slot": "4"
+              },
+              {
+                "label": "_operatorApprovals",
+                "type": "t_mapping(t_address,t_mapping(t_address,t_bool))",
+                "offset": 0,
+                "slot": "5"
+              }
+            ],
+            "numberOfBytes": "192"
+          },
+          "t_struct(ERC721URIStorageStorage)482_storage": {
+            "label": "struct ERC721URIStorageUpgradeable.ERC721URIStorageStorage",
+            "members": [
+              {
+                "label": "_tokenURIs",
+                "type": "t_mapping(t_uint256,t_string_storage)",
+                "offset": 0,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_struct(InitializableStorage)104_storage": {
+            "label": "struct Initializable.InitializableStorage",
+            "members": [
+              {
+                "label": "_initialized",
+                "type": "t_uint64",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "_initializing",
+                "type": "t_bool",
+                "offset": 8,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_struct(OwnableStorage)14_storage": {
+            "label": "struct OwnableUpgradeable.OwnableStorage",
+            "members": [
+              {
+                "label": "_owner",
+                "type": "t_address",
+                "offset": 0,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_struct(PausableStorage)533_storage": {
+            "label": "struct PausableUpgradeable.PausableStorage",
+            "members": [
+              {
+                "label": "_paused",
+                "type": "t_bool",
+                "offset": 0,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_uint256": {
+            "label": "uint256",
+            "numberOfBytes": "32"
+          },
+          "t_uint64": {
+            "label": "uint64",
+            "numberOfBytes": "8"
+          },
+          "t_contract(IERC20)6075": {
+            "label": "contract IERC20",
+            "numberOfBytes": "20"
+          },
+          "t_enum(BackgroundOptions)14775": {
+            "label": "enum Chibifactory1.BackgroundOptions",
+            "members": [
+              "PinkGradient",
+              "GreenGradient",
+              "BlueGradient",
+              "YellowGradient"
+            ],
+            "numberOfBytes": "1"
+          },
+          "t_enum(BodyOptions)14770": {
+            "label": "enum Chibifactory1.BodyOptions",
+            "members": [
+              "RobotBody",
+              "OriginalBody",
+              "GreenBody",
+              "GoldTuxedo"
+            ],
+            "numberOfBytes": "1"
+          },
+          "t_enum(EyeColorOptions)14765": {
+            "label": "enum Chibifactory1.EyeColorOptions",
+            "members": [
+              "HypnotizeEyes",
+              "RainbowSpiralEyes",
+              "DoubleEyes",
+              "YellowEyes",
+              "BlackEyes",
+              "BlueEyes"
+            ],
+            "numberOfBytes": "1"
+          },
+          "t_enum(HatOptions)14747": {
+            "label": "enum Chibifactory1.HatOptions",
+            "members": [
+              "Kitty",
+              "SGBBeanie",
+              "Toad",
+              "SpinyCap",
+              "Mohawk",
+              "Samurai"
+            ],
+            "numberOfBytes": "1"
+          },
+          "t_enum(HeadOptions)14755": {
+            "label": "enum Chibifactory1.HeadOptions",
+            "members": [
+              "OriginalHead",
+              "GreenAlienHead",
+              "HumanoidHead",
+              "RobotHead",
+              "AlienHead",
+              "GoldHead",
+              "Monkey"
+            ],
+            "numberOfBytes": "1"
+          },
+          "t_enum(MouthOptions)14758": {
+            "label": "enum Chibifactory1.MouthOptions",
+            "members": [
+              "VampireMouth",
+              "Butter"
+            ],
+            "numberOfBytes": "1"
+          },
+          "t_mapping(t_address,t_mapping(t_enum(BackgroundOptions)14775,t_bool))": {
+            "label": "mapping(address => mapping(enum Chibifactory1.BackgroundOptions => bool))",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_address,t_mapping(t_enum(BodyOptions)14770,t_bool))": {
+            "label": "mapping(address => mapping(enum Chibifactory1.BodyOptions => bool))",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_address,t_mapping(t_enum(EyeColorOptions)14765,t_bool))": {
+            "label": "mapping(address => mapping(enum Chibifactory1.EyeColorOptions => bool))",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_address,t_mapping(t_enum(HatOptions)14747,t_bool))": {
+            "label": "mapping(address => mapping(enum Chibifactory1.HatOptions => bool))",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_address,t_mapping(t_enum(HeadOptions)14755,t_bool))": {
+            "label": "mapping(address => mapping(enum Chibifactory1.HeadOptions => bool))",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_address,t_mapping(t_enum(MouthOptions)14758,t_bool))": {
+            "label": "mapping(address => mapping(enum Chibifactory1.MouthOptions => bool))",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_enum(BackgroundOptions)14775,t_bool)": {
+            "label": "mapping(enum Chibifactory1.BackgroundOptions => bool)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_enum(BackgroundOptions)14775,t_uint256)": {
+            "label": "mapping(enum Chibifactory1.BackgroundOptions => uint256)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_enum(BodyOptions)14770,t_bool)": {
+            "label": "mapping(enum Chibifactory1.BodyOptions => bool)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_enum(BodyOptions)14770,t_uint256)": {
+            "label": "mapping(enum Chibifactory1.BodyOptions => uint256)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_enum(EyeColorOptions)14765,t_bool)": {
+            "label": "mapping(enum Chibifactory1.EyeColorOptions => bool)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_enum(EyeColorOptions)14765,t_uint256)": {
+            "label": "mapping(enum Chibifactory1.EyeColorOptions => uint256)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_enum(HatOptions)14747,t_bool)": {
+            "label": "mapping(enum Chibifactory1.HatOptions => bool)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_enum(HatOptions)14747,t_uint256)": {
+            "label": "mapping(enum Chibifactory1.HatOptions => uint256)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_enum(HeadOptions)14755,t_bool)": {
+            "label": "mapping(enum Chibifactory1.HeadOptions => bool)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_enum(HeadOptions)14755,t_uint256)": {
+            "label": "mapping(enum Chibifactory1.HeadOptions => uint256)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_enum(MouthOptions)14758,t_bool)": {
+            "label": "mapping(enum Chibifactory1.MouthOptions => bool)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_enum(MouthOptions)14758,t_uint256)": {
+            "label": "mapping(enum Chibifactory1.MouthOptions => uint256)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint256,t_struct(Traits)14794_storage)": {
+            "label": "mapping(uint256 => struct Chibifactory1.Traits)",
+            "numberOfBytes": "32"
+          },
+          "t_struct(Traits)14794_storage": {
+            "label": "struct Chibifactory1.Traits",
+            "members": [
+              {
+                "label": "hat",
+                "type": "t_enum(HatOptions)14747",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "head",
+                "type": "t_enum(HeadOptions)14755",
+                "offset": 1,
+                "slot": "0"
+              },
+              {
+                "label": "mouth",
+                "type": "t_enum(MouthOptions)14758",
+                "offset": 2,
+                "slot": "0"
+              },
+              {
+                "label": "eyeColor",
+                "type": "t_enum(EyeColorOptions)14765",
+                "offset": 3,
+                "slot": "0"
+              },
+              {
+                "label": "body",
+                "type": "t_enum(BodyOptions)14770",
+                "offset": 4,
+                "slot": "0"
+              },
+              {
+                "label": "background",
+                "type": "t_enum(BackgroundOptions)14775",
+                "offset": 5,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          }
+        },
+        "namespaces": {
           "erc7201:openzeppelin.storage.Ownable": [
             {
               "contract": "OwnableUpgradeable",

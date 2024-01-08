@@ -1,13 +1,13 @@
 async function main() {
   const proxyAddress = '0xa27bC320252d51EEAA24BCCF6cc003979E485860'; // Existing UUPS proxy address
-  const BoxV2 = await ethers.getContractFactory("ERC20V3");
+  const BoxV2 = await ethers.getContractFactory("Chibifactory1");
 
   console.log("Preparing upgrade...");
 
   try {
     const upgradedProxy = await upgrades.upgradeProxy(proxyAddress, BoxV2);
-    console.log("Upgrade successful. New proxy address:", upgradedProxy.address);
-    console.log("Upgrade proxy address same as initial:", proxyAddress);
+    console.log("Proxy Contract deployed to:", await upgradedProxy.getAddress());
+
 
   } 
   
