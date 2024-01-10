@@ -1,5 +1,5 @@
 async function main() {
-  const proxyAddress = '0xa27bC320252d51EEAA24BCCF6cc003979E485860'; // Existing UUPS proxy address
+  const proxyAddress = '0xacC09486C9e34aa1Dff13b2E64d5482A3648D018'; // Existing UUPS proxy address
   const BoxV2 = await ethers.getContractFactory("Chibifactory1");
 
   console.log("Preparing upgrade...");

@@ -61,7 +61,17 @@ contract Chibifactory1 is Initializable, ERC721Upgradeable, ERC721EnumerableUpgr
   
 
     event TraitSwapped(uint256 indexed tokenId, HatOptions newHat, HeadOptions newHead, MouthOptions newMouth, EyeColorOptions newEyeColor, BodyOptions newBody, BackgroundOptions newBackground);
-
+    event TraitPurchased(address indexed user, HatOptions hatOption, HeadOptions headOption, MouthOptions mouthOption, EyeColorOptions eyeColorOption, BodyOptions bodyOption, BackgroundOptions backgroundOption);
+    event TraitPriceUpdated(HatOptions hatOption, HeadOptions headOption, MouthOptions mouthOption, EyeColorOptions eyeColorOption, BodyOptions bodyOption, BackgroundOptions backgroundOption);
+    event MintNFT(
+        HatOptions hat,
+        HeadOptions head,
+        MouthOptions mouth,
+        EyeColorOptions eyeColor,
+        BodyOptions body,
+        BackgroundOptions background,
+        uint256 tokenId
+    );
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
         _disableInitializers();
@@ -78,7 +88,7 @@ contract Chibifactory1 is Initializable, ERC721Upgradeable, ERC721EnumerableUpgr
         erc20Token = IERC20(_tokenAddress);
         _nextTokenId = 1; 
         baseExtension = ".json";
-        baseURI = "http://localhost:3000/metadata/";
+        baseURI = "";
         maxSupply = 10000;
     }
 
@@ -149,15 +159,19 @@ contract Chibifactory1 is Initializable, ERC721Upgradeable, ERC721EnumerableUpgr
    
   
    
-    function mergeTraitsAndMintNFT(HatOptions hat, HeadOptions head, MouthOptions mouth, EyeColorOptions eyeColor, BodyOptions body, BackgroundOptions background) public {
-        
-        uint256 tokenId = _nextTokenId++;
-        tokenTraits[tokenId] = Traits({hat: hat, head: head, mouth: mouth, eyeColor: eyeColor, body: body, background: background});
+  
+    function mergeTraitsAndMintNFT(HatOptions hat, HeadOptions head, MouthOptions mouth, EyeColorOptions eyeColor, BodyOptions body, BackgroundOptions background) public returns (uint256) {
+    
+    uint256 tokenId = _nextTokenId++;
+    tokenTraits[tokenId] = Traits({hat: hat, head: head, mouth: mouth, eyeColor: eyeColor, body: body, background: background});
 
-        _safeMint(msg.sender, tokenId);
+    _safeMint(msg.sender, tokenId);
+    emit MintNFT( hat, head, mouth, eyeColor, body, background, tokenId);
 
-        // No need for _setTokenURI here
-    }
+    // Return the tokenId of the minted NFT
+    return tokenId;
+}
+
 
     function updateTraits(uint256 tokenId, HatOptions newHat, HeadOptions newHead, MouthOptions newMouth, EyeColorOptions newEyeColor, BodyOptions newBody, BackgroundOptions newBackground) public {
     require(ownerOf(tokenId) == msg.sender, "Caller is not the owner");

@@ -9,7 +9,7 @@ async function main() {
 
     await chibiFactory.waitForDeployment();
 
-    console.log("FActory deployed to:", await chibiFactory.getAddress());
+    console.log("Chibi-Factory deployed to:", await chibiFactory.getAddress());
 }
 
 main().then(() => process.exit(0)).catch(error => {
