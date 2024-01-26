@@ -16,8 +16,8 @@ async function main() {
     const psychoGemsAddress = await PsychoGems.getAddress();
 
     // Deploying the initial ERC721 contract
-    const ERC721 = await ethers.getContractFactory("PsychoChibis");
-    const PsychoChibis = await upgrades.deployProxy(ERC721, [ initialOwner, psychoGemsAddress ], { initializer: 'initialize', kind: 'uups' });
+    const ERC721 = await ethers.getContractFactory("SimpleChibifactory");
+    const PsychoChibis = await upgrades.deployProxy(ERC721, [ psychoGemsAddress ], { initializer: 'initialize', kind: 'uups' });
  
     
 
@@ -35,7 +35,7 @@ async function main() {
 
     // Log deployed addresses
     console.log("Psycho Gems deployed to:", await PsychoGems.getAddress());
-    console.log("Psycho Chibis deployed to:", await PsychoChibis.getAddress());
+    console.log("Psycho Simple Factory deployed to:", await PsychoChibis.getAddress());
     // console.log("StakingContract deployed to:", await stakingContract.getAddress());
 
 

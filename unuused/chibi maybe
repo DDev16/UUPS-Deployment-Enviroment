@@ -1,0 +1,320 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.22;
+
+import "@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721EnumerableUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721URIStorageUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721PausableUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721BurnableUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/utils/Strings.sol";
+
+contract Chibifactory1 is Initializable, ERC721Upgradeable, ERC721EnumerableUpgradeable, ERC721URIStorageUpgradeable, ERC721PausableUpgradeable, OwnableUpgradeable, ERC721BurnableUpgradeable, UUPSUpgradeable {
+    uint256 private _nextTokenId;
+    string public baseURI;
+    string public baseExtension;
+    uint256 public maxSupply;
+
+    struct TraitInfo {
+        uint256 supply;
+        uint256 price;
+    }
+
+    struct Traits {
+        HatOptions: hat;
+        HeadOptions head;
+        MouthOptions mouth;
+        AccessoryOptions accessory;
+        EyeColorOptions eyeColor;
+        BodyOptions body;
+        BackOptions back;
+        BackgroundOptions background;
+    }
+
+    mapping(uint256 => Traits) public tokenTraits;
+
+    struct TraitOwnership {
+        mapping(HatOptions => bool) hats;
+        mapping(HeadOptions => bool) heads;
+        mapping(MouthOptions => bool) mouths;
+        mapping(AccessoryOptions => bool) accessories;
+        mapping(EyeColorOptions => bool) eyeColors;
+        mapping(BodyOptions => bool) bodies;
+        mapping(BackOptions => bool) backs;
+        mapping(BackgroundOptions => bool) backgrounds;
+    }
+
+    mapping(address => TraitOwnership) internal userTraitOwnership;
+
+    mapping(HatOptions => TraitInfo) public hatTraits;
+    mapping(HeadOptions => TraitInfo) public headTraits;
+    mapping(MouthOptions => TraitInfo) public mouthTraits;
+    mapping(AccessoryOptions => TraitInfo) public accessoryTraits;
+    mapping(EyeColorOptions => TraitInfo) public eyeColorTraits;
+    mapping(BodyOptions => TraitInfo) public bodyTraits;
+    mapping(BackOptions => TraitInfo) public backTraits;
+    mapping(BackgroundOptions => TraitInfo) public backgroundTraits;
+
+    IERC20 public erc20Token;
+
+    event TraitSwapped(uint256 indexed tokenId, HatOptions newHat, HeadOptions newHead, MouthOptions newMouth, AccessoryOptions accessoryOption, EyeColorOptions newEyeColor, BodyOptions newBody, BackOptions backOption, BackgroundOptions newBackground);
+    event TraitPurchased(address indexed user, HatOptions hatOption, HeadOptions headOption, MouthOptions mouthOption, AccessoryOptions accessoryOption, EyeColorOptions eyeColorOption, BodyOptions bodyOption, BackOptions backOption, BackgroundOptions backgroundOption);
+
+    /// @custom:oz-upgrades-unsafe-allow constructor
+    constructor() {
+        _disableInitializers();
+    }
+
+
+    function initialize(address _tokenAddress) initializer public {
+        __ERC721_init("chibifactory", "CHB");
+        __ERC721Enumerable_init();
+        __ERC721URIStorage_init();
+        __ERC721Pausable_init();
+        __Ownable_init(msg.sender);
+        __ERC721Burnable_init();
+        __UUPSUpgradeable_init();
+        erc20Token = IERC20(_tokenAddress);
+        _nextTokenId = 1; 
+        baseExtension = ".json";
+        baseURI = "";
+        maxSupply = 10000;
+
+
+    }
+
+    
+    function tokenURI(uint256 tokenId)
+                public
+                view
+                override(ERC721Upgradeable, ERC721URIStorageUpgradeable)
+                returns (string memory)
+            {
+                return super.tokenURI(tokenId);
+            }
+
+   function purchaseHat(HatOptions hatOption) public {
+        require(hatSupply[hatOption] > 0, "Hat option sold out");
+        require(hatPrices[hatOption] > 0, "Hat option not for sale");
+        require(erc20Token.balanceOf(msg.sender) >= hatPrices[hatOption], "Not enough tokens to purchase");
+        require(erc20Token.allowance(msg.sender, address(this)) >= hatPrices[hatOption], "Not enough allowance to purchase");
+        erc20Token.transferFrom(msg.sender, address(this), hatPrices[hatOption]);
+        userTraitOwnership[msg.sender].hats[hatOption] = true;
+    }
+
+    function purchaseHead(HeadOptions headOption) public {
+        require(headSupply[headOption] > 0, "Head option sold out");
+        require(headPrices[headOption] > 0, "Head option not for sale");
+        require(erc20Token.balanceOf(msg.sender) >= headPrices[headOption], "Not enough tokens to purchase");
+        require(erc20Token.allowance(msg.sender, address(this)) >= headPrices[headOption], "Not enough allowance to purchase");
+        erc20Token.transferFrom(msg.sender, address(this), headPrices[headOption]);
+        userTraitOwnership[msg.sender].heads[headOption] = true;
+    }
+
+    function purchaseMouth(MouthOptions mouthOption) public {
+        require(mouthSupply[mouthOption] > 0, "Mouth option sold out");
+        require(mouthPrices[mouthOption] > 0, "Mouth option not for sale");
+        require(erc20Token.balanceOf(msg.sender) >= mouthPrices[mouthOption], "Not enough tokens to purchase");
+        require(erc20Token.allowance(msg.sender, address(this)) >= mouthPrices[mouthOption], "Not enough allowance to purchase");
+        erc20Token.transferFrom(msg.sender, address(this), mouthPrices[mouthOption]);
+        userTraitOwnership[msg.sender].mouths[mouthOption] = true;
+
+    }
+
+    function purchaseAccessory(AccessoryOptions accessoryOption) public {
+        require(accessorySupply[accessoryOption] > 0, "Accessory option sold out");
+        require(accessoryPrices[accessoryOption] > 0, "Accessory option not for sale");
+        require(erc20Token.balanceOf(msg.sender) >= accessoryPrices[accessoryOption], "Not enough tokens to purchase");
+        require(erc20Token.allowance(msg.sender, address(this)) >= accessoryPrices[accessoryOption], "Not enough allowance to purchase");
+        erc20Token.transferFrom(msg.sender, address(this), accessoryPrices[accessoryOption]);
+        userTraitOwnership[msg.sender].accessories[accessoryOption] = true;
+    }
+
+    function purchaseEyeColor(EyeColorOptions eyeColorOption) public {
+        require(eyeColorSupply[eyeColorOption] > 0, "Eye color option sold out");
+        require(eyeColorPrices[eyeColorOption] > 0, "Eye color option not for sale");
+        require(erc20Token.balanceOf(msg.sender) >= eyeColorPrices[eyeColorOption], "Not enough tokens to purchase");
+        require(erc20Token.allowance(msg.sender, address(this)) >= eyeColorPrices[eyeColorOption], "Not enough allowance to purchase");
+        erc20Token.transferFrom(msg.sender, address(this), eyeColorPrices[eyeColorOption]);
+        userTraitOwnership[msg.sender].eyeColors[eyeColorOption] = true;
+    }
+
+    function purchaseBody(BodyOptions bodyOption) public {
+        require(bodySupply[bodyOption] > 0, "Body option sold out");
+        require(bodyPrices[bodyOption] > 0, "Body option not for sale");
+        require(erc20Token.balanceOf(msg.sender) >= bodyPrices[bodyOption], "Not enough tokens to purchase");
+        require(erc20Token.allowance(msg.sender, address(this)) >= bodyPrices[bodyOption], "Not enough allowance to purchase");
+        erc20Token.transferFrom(msg.sender, address(this), bodyPrices[bodyOption]);
+        userTraitOwnership[msg.sender].bodies[bodyOption] = true;
+    }
+
+    function purchaseBack(BackOptions backOption) public {
+        require(backSupply[backOption] > 0, "Back option sold out");
+        require(backPrices[backOption] > 0, "Back option not for sale");
+        require(erc20Token.balanceOf(msg.sender) >= backPrices[backOption], "Not enough tokens to purchase");
+        require(erc20Token.allowance(msg.sender, address(this)) >= backPrices[backOption], "Not enough allowance to purchase");
+        erc20Token.transferFrom(msg.sender, address(this), backPrices[backOption]);
+        userTraitOwnership[msg.sender].backs[backOption] = true;
+    }
+
+    function purchaseBackground(BackgroundOptions backgroundOption) public {
+        require(backgroundSupply[backgroundOption] > 0, "Background option sold out");
+        require(backgroundPrices[backgroundOption] > 0, "Background option not for sale");
+        require(erc20Token.balanceOf(msg.sender) >= backgroundPrices[backgroundOption], "Not enough tokens to purchase");
+        require(erc20Token.allowance(msg.sender, address(this)) >= backgroundPrices[backgroundOption], "Not enough allowance to purchase");
+        erc20Token.transferFrom(msg.sender, address(this), backgroundPrices[backgroundOption]);
+        userTraitOwnership[msg.sender].backgrounds[backgroundOption] = true;
+    }
+
+
+
+
+
+  function updatePrice (HatOptions hatOption, HeadOptions headOption, MouthOptions mouthOption, AccessoryOptions accessoryOption, EyeColorOptions eyeColorOption, BodyOptions bodyOption, BackOptions backOption, BackgroundOptions backgroundOption, uint256 newPrice) public onlyOwner {
+    hatPrices[hatOption] = newPrice;
+    headPrices[headOption] = newPrice;
+    mouthPrices[mouthOption] = newPrice;
+    accessoryPrices[accessoryOption] = newPrice;
+    eyeColorPrices[eyeColorOption] = newPrice;
+    bodyPrices[bodyOption] = newPrice;
+    backPrices[backOption] = newPrice;
+    backgroundPrices[backgroundOption] = newPrice;
+
+}
+
+
+function setTraitOptionsSupply (HatOptions hatOption, HeadOptions headOption, MouthOptions mouthOption, AccessoryOptions accessoryOption, EyeColorOptions eyeColorOption, BodyOptions bodyOption, BackOptions backOption, BackgroundOptions backgroundOption, uint256 newSupply) public onlyOwner {
+    hatSupply[hatOption] = newSupply;
+    headSupply[headOption] = newSupply;
+    mouthSupply[mouthOption] = newSupply;
+    accessorySupply[accessoryOption] = newSupply;
+    eyeColorSupply[eyeColorOption] = newSupply;
+    bodySupply[bodyOption] = newSupply;
+    backSupply[backOption] = newSupply;
+    backgroundSupply[backgroundOption] = newSupply;
+}
+
+
+
+   
+  
+    function mergeTraitsAndMintNFT(HatOptions hat, HeadOptions head, MouthOptions mouth, AccessoryOptions accessory, EyeColorOptions eyeColor, BodyOptions body, BackOptions back, BackgroundOptions background) public returns (uint256) {
+     // Check if the supply for each trait is greater than 0
+    require(hatSupply[hat] > 0, "Hat option sold out");
+    require(headSupply[head] > 0, "Head option sold out");
+    require(mouthSupply[mouth] > 0, "Mouth option sold out");
+    require(accessorySupply[accessory] > 0, "Accessory option sold out");
+    require(eyeColorSupply[eyeColor] > 0, "Eye color option sold out");
+    require(bodySupply[body] > 0, "Body option sold out");
+    require(backSupply[back] > 0, "Back option sold out");
+    require(backgroundSupply[background] > 0, "Background option sold out");
+
+
+    // Decrement the supply for each trait
+    hatSupply[hat]--;
+    headSupply[head]--;
+    mouthSupply[mouth]--;
+    accessorySupply[accessory]--;
+    eyeColorSupply[eyeColor]--;
+    bodySupply[body]--;
+    backSupply[back]--;
+    backgroundSupply[background]--;
+
+    uint256 tokenId = _nextTokenId++;
+    tokenTraits[tokenId] = Traits({hat: hat, head: head, mouth: mouth, accessory: accessory, eyeColor: eyeColor, body: body, back: back, background: background});
+
+    _safeMint(msg.sender, tokenId);
+
+    // Return the tokenId of the minted NFT
+    return tokenId;
+}
+
+
+
+    function updateTraits(uint256 tokenId, HatOptions newHat, HeadOptions newHead, MouthOptions newMouth, AccessoryOptions newAccessory, EyeColorOptions newEyeColor, BodyOptions newBody, BackOptions newBack, BackgroundOptions newBackground) public {
+    require(ownerOf(tokenId) == msg.sender, "Caller is not the owner");
+        
+    require(userTraitOwnership[msg.sender].hats[newHat] == true, "You do not own this hat");
+    require(userTraitOwnership[msg.sender].heads[newHead] == true, "You do not own this head");
+    require(userTraitOwnership[msg.sender].mouths[newMouth] == true, "You do not own this mouth");
+    require(userTraitOwnership[msg.sender].accessories[newAccessory] == true, "You do not own this accessory");
+    require(userTraitOwnership[msg.sender].eyeColors[newEyeColor] == true, "You do not own this eye color");
+    require(userTraitOwnership[msg.sender].bodies[newBody] == true, "You do not own this body");
+    require(userTraitOwnership[msg.sender].backs[newBack] == true, "You do not own this back");
+    require(userTraitOwnership[msg.sender].backgrounds[newBackground] == true, "You do not own this background");
+
+    // Update the traits
+    tokenTraits[tokenId].hat = newHat;
+    tokenTraits[tokenId].head = newHead;
+    tokenTraits[tokenId].mouth = newMouth;
+    tokenTraits[tokenId].accessory = newAccessory;
+    tokenTraits[tokenId].eyeColor = newEyeColor;
+    tokenTraits[tokenId].body = newBody;
+    tokenTraits[tokenId].back = newBack;
+    tokenTraits[tokenId].background = newBackground;
+
+    // Emit an event to notify about the trait update
+    emit TraitSwapped(tokenId, newHat, newHead, newMouth, newAccessory, newEyeColor, newBody, newBack, newBackground);
+}
+
+
+
+    function getTokenTraits(uint256 tokenId) public view returns (Traits memory) {
+        require(ownerOf(tokenId) != address(0), "Token does not exist");
+        return tokenTraits[tokenId];
+    }
+
+
+
+    function updateTokenURI(uint256 tokenId, string memory newTokenURI) public {
+    require(ownerOf(tokenId) == msg.sender, "Caller is not the owner");
+
+    // Call the _setTokenURI function from the ERC721URIStorageUpgradeable contract
+    super._setTokenURI(tokenId, newTokenURI);
+}
+
+
+  
+
+    function pause() public onlyOwner {
+        _pause();
+    }
+
+    function unpause() public onlyOwner {
+        _unpause();
+    }
+
+    function _authorizeUpgrade(address newImplementation) internal onlyOwner override {}
+
+    function _update(address to, uint256 tokenId, address auth) internal override(ERC721Upgradeable, ERC721EnumerableUpgradeable, ERC721PausableUpgradeable) returns (address) {
+        return super._update(to, tokenId, auth);
+    }
+
+    function _increaseBalance(address account, uint128 value) internal override(ERC721Upgradeable, ERC721EnumerableUpgradeable) {
+        super._increaseBalance(account, value);
+    }
+
+
+    function supportsInterface(bytes4 interfaceId) public view override(ERC721Upgradeable, ERC721EnumerableUpgradeable, ERC721URIStorageUpgradeable) returns (bool) {
+        return super.supportsInterface(interfaceId);
+    }
+    
+
+        function _baseURI() internal view override returns (string memory) {
+        return baseURI;
+    }
+
+    function setBaseURI(string memory newBaseURI) public onlyOwner {
+        baseURI = newBaseURI;
+    }
+
+
+    function setERC20TokenAddress(address _tokenAddress) external onlyOwner {
+        erc20Token = IERC20(_tokenAddress);
+    }
+
+
+}

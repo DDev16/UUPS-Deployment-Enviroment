@@ -16,7 +16,7 @@ import "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol
 // Import the interface for the ERC20 token
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
-contract NFTV1 is Initializable, ERC721Upgradeable, ERC721EnumerableUpgradeable, ERC721URIStorageUpgradeable, ERC721PausableUpgradeable, OwnableUpgradeable, ERC721BurnableUpgradeable, UUPSUpgradeable, ReentrancyGuardUpgradeable {
+contract PsychoChibis is Initializable, ERC721Upgradeable, ERC721EnumerableUpgradeable, ERC721URIStorageUpgradeable, ERC721PausableUpgradeable, OwnableUpgradeable, ERC721BurnableUpgradeable, UUPSUpgradeable, ReentrancyGuardUpgradeable {
 
     struct TokenWithBaseURI {
         uint256 tokenId;
@@ -33,9 +33,19 @@ contract NFTV1 is Initializable, ERC721Upgradeable, ERC721EnumerableUpgradeable,
     string public notRevealedUri;
     bool public presaleActive;
     uint256 public nftholderRewardPercentage;
+     // Storage variables for accumulated funds
+    uint256 public totalDelegationFunds;
+    uint256 public totalLPFunds;
+
+    uint256 private nonce;
+
+    mapping(uint256 => bool) private mintedTokenIds;
 
     // Mapping to track rewards for NFTholders
     mapping(address => uint256) public nftholderRewards;
+
+    // Mapping to track the number of NFTs held by each address
+    mapping(address => uint256) public totalNFTsHeld;
 
     // Owner's share mapping
     mapping(address => uint256) public ownerShares;
@@ -59,7 +69,7 @@ contract NFTV1 is Initializable, ERC721Upgradeable, ERC721EnumerableUpgradeable,
 
     // Initialize the contract with the address of the Psycho Gems ERC20 token contract
     function initialize(address initialOwner, address _psychoGemsToken) initializer public {
-        __ERC721_init("NFTV2", "NFTV2");
+        __ERC721_init("PsychoChibis", "PSYCHO");
         __ERC721Enumerable_init();
         __ERC721URIStorage_init();
         __ERC721Pausable_init();
@@ -69,63 +79,128 @@ contract NFTV1 is Initializable, ERC721Upgradeable, ERC721EnumerableUpgradeable,
 
         // Move initial value assignments to the constructor or initializers
         baseExtension = ".json";
-        presaleCost = 5 ether;
-        regularCost = 10 ether;
-        maxSupply = 10000;
-        maxMintAmount = 20;
+        presaleCost = 2150 ether;
+        regularCost = 3550 ether;
+        maxSupply = 1568;
+        maxMintAmount = 10;
         revealed = false;
-        baseURI = "ipfs:hiuh323123hjtestnkdkasd4323/"; // Replace with your URI
-        notRevealedUri = "ipfs:hiuh3231test23hjnkdkasd4323/"; // Replace with your URI
+        baseURI = "ipfs://bafybeidjgv5osvyogglerak62of77onccyss5neb2xocklwhgjozl5ne4u/"; // Replace with your URI
+        notRevealedUri = ""; // Replace with your URI
         presaleActive = true;
-        nftholderRewardPercentage = 10;
+        nftholderRewardPercentage = 15;
         psychoGemsToken = _psychoGemsToken; // Set the address of the Psycho Gems ERC20 token contract
+        nonce = 0;
     }
 
-      // Function to set the address of the Psycho Gems ERC20 token contract, only callable by the owner
-    function setPsychoGemsToken(address _newPsychoGemsToken) public onlyOwner {
-        psychoGemsToken = _newPsychoGemsToken;
-    }
+    // Constants for allocation percentages
+    uint256 private constant OWNER_PERCENTAGE = 60;
+    uint256 private constant DELEGATION_PERCENTAGE = 7;
+    uint256 private constant LP_PERCENTAGE = 7;
 
+    function mintWithReferral(uint256 _mintAmount, address referralCode) public payable nonReentrant returns (bool) {
+    uint256 supply = totalSupply();
+    require(!paused(), "Minting is currently paused");
+    require(_mintAmount > 0, "Mint amount must be greater than 0");
+    require(_mintAmount <= maxMintAmount, "Mint amount exceeds the maximum allowed");
+    require(supply + _mintAmount <= maxSupply, "Minting would exceed the maximum supply");
+    uint256 cost = presaleActive ? presaleCost : regularCost;
+    if (msg.sender != owner()) {
+        require(msg.value >= cost * _mintAmount, "Insufficient payment for minting");
 
-    // Function to mint NFTs with a referral code
-    function mintWithReferral(uint256 _mintAmount, address referralCode) public payable nonReentrant {
-        uint256 supply = totalSupply();
+        uint256 ownersShare = (cost * OWNER_PERCENTAGE * _mintAmount) / 100;
+        uint256 nftholderReward = (cost * nftholderRewardPercentage * _mintAmount) / 100;
+        uint256 delegation = (cost * DELEGATION_PERCENTAGE * _mintAmount) / 100;
+        uint256 lp = (cost * LP_PERCENTAGE * _mintAmount) / 100;
 
-        require(!paused(), "Minting is currently paused");
-        require(_mintAmount > 0, "Mint amount must be greater than 0");
-        require(_mintAmount <= maxMintAmount, "Mint amount exceeds the maximum allowed");
-        require(supply + _mintAmount <= maxSupply, "Minting would exceed the maximum supply");
+        ownerShares[owner()] += ownersShare;
+        distributeRewards(nftholderReward);
 
-        uint256 cost = presaleActive ? presaleCost : regularCost;
+        // Update the accumulated funds
+        totalDelegationFunds += delegation;
+        totalLPFunds += lp;
 
-        // Exempt the owner from paying any cost
-        if (msg.sender != owner()) {
-            require(msg.value >= cost * _mintAmount, "Insufficient payment for minting");
-
-            // Calculate the NFTholder reward based on the specified percentage
-            uint256 nftholderReward = (cost * nftholderRewardPercentage * _mintAmount) / 100;
-            nftholderRewards[msg.sender] += nftholderReward;
-            ownerShares[owner()] += msg.value - nftholderReward;
-
-            // Check if the referral code is valid (not the minter's address)
-            if (referralCode != address(0) && referralCode != msg.sender) {
-                referrals[referralCode].push(msg.sender);
+        if (referralCode != address(0) && referralCode != msg.sender) {
+       referrals[referralCode].push(msg.sender);
                 mintedWithReferral[msg.sender] += _mintAmount;
 
-                // Reward the referrer with 15 ether and the referee with deposited tokens per NFT
-                uint256 referrerReward = 15 ether * _mintAmount;
-                uint256 refereeReward = IERC20(psychoGemsToken).balanceOf(address(this)) * _mintAmount; // Use deposited tokens as rewards
+                uint256 referrerReward = 350 ether * _mintAmount;
+                 uint256 refereeReward = 350 ether * _mintAmount;  // Reward for the referee (updated calculation)
                 payable(referralCode).transfer(referrerReward);
-                IERC20(psychoGemsToken).transfer(msg.sender, refereeReward); // Transfer tokens to the referee
+                IERC20(psychoGemsToken).transfer(msg.sender, refereeReward);
 
                 emit ReferralReward(referralCode, msg.sender, refereeReward);
+
             }
         }
 
-        for (uint256 i = 1; i <= _mintAmount; i++) {
-            _safeMint(msg.sender, supply + i);
-        }
+       for (uint256 i = 0; i < _mintAmount; i++) {
+    uint256 randTokenId = randomTokenId();
+    while (mintedTokenIds[randTokenId]) {
+        randTokenId = randomTokenId();
     }
+    _safeMint(msg.sender, randTokenId);
+    mintedTokenIds[randTokenId] = true;
+
+    // Construct and set the token URI for the minted token
+    string memory newTokenURI = string(abi.encodePacked(baseURI, uint256ToString(randTokenId), baseExtension));
+    _setTokenURI(randTokenId, newTokenURI);
+}
+    return true;
+    }
+
+    function randomTokenId() internal returns (uint256) {
+    uint256 rand = uint256(keccak256(abi.encodePacked(block.timestamp, msg.sender, nonce))) % maxSupply;
+    nonce++;
+    return rand;
+    
+}
+
+
+
+        // Function to set the presale cost, only callable by the owner
+    function setPresaleCost(uint256 _newPresaleCost) public onlyOwner {
+        presaleCost = _newPresaleCost;
+    }
+
+    // Function to set the regular cost, only callable by the owner
+    function setRegularCost(uint256 _newRegularCost) public onlyOwner {
+        regularCost = _newRegularCost;
+    }
+
+    // Function to get the total delegation funds
+    function getTotalDelegationFunds() public view returns (uint256) {
+        return totalDelegationFunds;
+    }
+
+    // Function to get the total LP funds
+    function getTotalLPFunds() public view returns (uint256) {
+        return totalLPFunds;
+    }
+
+
+    // Function to withdraw delegation funds, restricted to the owner
+    function withdrawDelegationFunds(uint256 amount) public onlyOwner nonReentrant {
+        require(amount <= totalDelegationFunds, "Amount exceeds available delegation funds");
+        totalDelegationFunds -= amount;
+        payable(msg.sender).transfer(amount);
+    }
+
+    // Function to withdraw LP funds, restricted to the owner
+    function withdrawLPFunds(uint256 amount) public onlyOwner nonReentrant {
+        require(amount <= totalLPFunds, "Amount exceeds available LP funds");
+        totalLPFunds -= amount;
+        payable(msg.sender).transfer(amount);
+    }
+
+    // Function to distribute rewards based on NFT holdings
+function distributeRewards(uint256 totalReward) private {
+    uint256 totalNFTs = totalSupply();
+    for (uint256 i = 0; i < totalNFTs; i++) {
+        address holder = ownerOf(tokenByIndex(i));
+        uint256 holderShare = (totalReward * balanceOf(holder)) / totalNFTs;
+        nftholderRewards[holder] += holderShare;
+    }
+}
 
     // Function to claim NFTholder rewards
     function claimRewards() public nonReentrant {
@@ -143,12 +218,15 @@ contract NFTV1 is Initializable, ERC721Upgradeable, ERC721EnumerableUpgradeable,
         payable(owner()).transfer(share);
     }
 
-    // Emergency withdrawal function for leftover funds
-    function emergencyWithdraw() public onlyOwner nonReentrant {
-        uint256 contractBalance = address(this).balance;
-        require(contractBalance > 0, "No funds to withdraw");
-        payable(owner()).transfer(contractBalance);
-    }
+   // Emergency withdrawal function for specified amount
+function emergencyWithdraw(uint256 amount) public onlyOwner nonReentrant {
+    uint256 contractBalance = address(this).balance;
+    require(contractBalance >= amount, "Insufficient funds for withdrawal");
+    require(amount > 0, "Withdrawal amount must be greater than zero");
+
+    payable(owner()).transfer(amount);
+}
+
 
     // Function to fetch token IDs and their base URIs
     function getTokenIdsWithBaseURIs() public view returns (TokenWithBaseURI[] memory) {
@@ -165,27 +243,32 @@ contract NFTV1 is Initializable, ERC721Upgradeable, ERC721EnumerableUpgradeable,
         return tokenInfo;
     }
 
-    function uint256ToString(uint256 value) internal pure returns (string memory) {
-        if (value == 0) {
-            return "0";
-        }
-        uint256 temp = value;
-        uint256 digits;
-        while (temp > 0) {
-            temp /= 10;
-            digits++;
-        }
-        bytes memory buffer = new bytes(digits);
-        while (value > 0) {
-            digits -= 1;
-            buffer[digits] = bytes1(uint8(48 + uint256(value % 10)));
-            value /= 10;
-        }
-        return string(buffer);
+
+
+    // Helper function to convert uint256 to string
+function uint256ToString(uint256 value) internal pure returns (string memory) {
+    // Code to convert uint256 to string
+    if (value == 0) {
+        return "0";
     }
+    uint256 temp = value;
+    uint256 digits;
+    while (temp != 0) {
+        digits++;
+        temp /= 10;
+    }
+    bytes memory buffer = new bytes(digits);
+    while (value != 0) {
+        digits -= 1;
+        buffer[digits] = bytes1(uint8(48 + uint256(value % 10)));
+        value /= 10;
+    }
+    return string(buffer);
+}
+
 
     function version() pure public returns (string memory) {
-        return "v4!";
+        return "v1!";
     }
 
     function _authorizeUpgrade(address newImplementation) internal onlyOwner override {}
@@ -208,14 +291,19 @@ contract NFTV1 is Initializable, ERC721Upgradeable, ERC721EnumerableUpgradeable,
         return super.supportsInterface(interfaceId);
     }
 
-    // Function to set the presale cost, only callable by the owner
-function setPresaleCost(uint256 _newPresaleCost) public onlyOwner {
-    presaleCost = _newPresaleCost;
+    function setBaseURI(string memory newBaseURI) public onlyOwner {
+    baseURI = newBaseURI;
 }
 
-// Function to set the regular cost, only callable by the owner
-function setRegularCost(uint256 _newRegularCost) public onlyOwner {
-    regularCost = _newRegularCost;
+// Function to set the token URI for a given token
+function setTokenURI(uint256 tokenId, string memory _tokenURI) public onlyOwner {
+    require(ownerOf(tokenId) != address(0), "ERC721URIStorage: URI set of nonexistent token");
+
+    // Construct the full URI
+    string memory fullURI = string(abi.encodePacked(_tokenURI, uint256ToString(tokenId), ".json"));
+    _setTokenURI(tokenId, fullURI);
 }
+
+
 
 }

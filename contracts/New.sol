@@ -57,7 +57,7 @@ contract NFTV3 is Initializable, ERC721Upgradeable, ERC721EnumerableUpgradeable,
 
     // Initialize the contract with the address of the Psycho Gems ERC20 token contract
     function initialize(address initialOwner, address _psychoGemsToken) initializer public {
-        __ERC721_init("NFTV2", "NFTV2");
+        __ERC721_init("PsychoChibis", "PSYCHO");
         __ERC721Enumerable_init();
         __ERC721URIStorage_init();
         __ERC721Pausable_init();
@@ -67,15 +67,15 @@ contract NFTV3 is Initializable, ERC721Upgradeable, ERC721EnumerableUpgradeable,
 
         // Move initial value assignments to the constructor or initializers
         baseExtension = ".json";
-        presaleCost = 5 ether;
-        regularCost = 10 ether;
-        maxSupply = 10000;
-        maxMintAmount = 20;
+        presaleCost = 1970 ether;
+        regularCost = 3285 ether;
+        maxSupply = 1568;
+        maxMintAmount = 10;
         revealed = false;
-        baseURI = "ipfs:hiuh323123hjtestnkdkasd4323/"; // Replace with your URI
-        notRevealedUri = "ipfs:hiuh3231test23hjnkdkasd4323/"; // Replace with your URI
+        baseURI = "ipfs://bafybeiegkughbtwgbatlh5vogpu7gjj6pc3seeoorfjcqrwvgy64l4a43i/"; // Replace with your URI
+        notRevealedUri = ""; // Replace with your URI
         presaleActive = true;
-        nftholderRewardPercentage = 10;
+        nftholderRewardPercentage = 15;
         psychoGemsToken = _psychoGemsToken; // Set the address of the Psycho Gems ERC20 token contract
     }
 

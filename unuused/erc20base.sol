@@ -10,16 +10,16 @@ import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20VotesUpg
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 
-contract PsychoGems is  Initializable, ERC20Upgradeable, ERC20BurnableUpgradeable, ERC20PausableUpgradeable, OwnableUpgradeable, ERC20PermitUpgradeable, ERC20VotesUpgradeable, UUPSUpgradeable {
+contract ERC20V1 is  Initializable, ERC20Upgradeable, ERC20BurnableUpgradeable, ERC20PausableUpgradeable, OwnableUpgradeable, ERC20PermitUpgradeable, ERC20VotesUpgradeable, UUPSUpgradeable {
      
 
       // Constants for the claim functionality
-    uint256 private constant TOKENS_PER_CLAIM = 5 * 10**18; // 250 tokens per claim
+    uint256 private constant TOKENS_PER_CLAIM = 250 * 10**18; // 250 tokens per claim
     uint256 private constant CLAIM_INTERVAL = 1 days;
 
     // Mapping to keep track of last claim times
     mapping(address => uint256) private lastClaimTimes;
- 
+
     
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
@@ -27,11 +27,11 @@ contract PsychoGems is  Initializable, ERC20Upgradeable, ERC20BurnableUpgradeabl
     }
 
     function initialize(address initialOwner) initializer public {
-        __ERC20_init("PsychoGems", "PSYGEM");
+        __ERC20_init("Version2", "V1");
         __ERC20Burnable_init();
         __ERC20Pausable_init();
         __Ownable_init(initialOwner);
-        __ERC20Permit_init("PsychoGems");
+        __ERC20Permit_init("Version2");
         __ERC20Votes_init();
         __UUPSUpgradeable_init();
 
@@ -43,14 +43,13 @@ contract PsychoGems is  Initializable, ERC20Upgradeable, ERC20BurnableUpgradeabl
         _mint(to, amount);
     }
 
-     function claimTokens() public {
+         function claimTokens() public {
         require(block.timestamp - lastClaimTimes[msg.sender] >= CLAIM_INTERVAL, "Claim interval not reached");
-
-        // Mint tokens directly to the claimant
-        _mint(msg.sender, TOKENS_PER_CLAIM);
-
+        require(balanceOf(address(this)) >= TOKENS_PER_CLAIM, "Insufficient tokens in contract");
         lastClaimTimes[msg.sender] = block.timestamp;
+        _transfer(address(this), msg.sender, TOKENS_PER_CLAIM);
     }
+
 
 
     // A function for transferring ownership of the contract.
@@ -69,7 +68,7 @@ contract PsychoGems is  Initializable, ERC20Upgradeable, ERC20BurnableUpgradeabl
 
 
     function version() pure public returns (string memory) {
-        return "v1!";
+        return "v2!";
     }
 
     // Override the upgrade authorization function to allow only the owner to upgrade.

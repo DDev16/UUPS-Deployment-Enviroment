@@ -1,0 +1,6 @@
+$counter = 1
+Get-ChildItem -Path 'C:\Users\dillo\OneDrive\Desktop\1Chibiopenai' | Sort-Object | ForEach-Object {
+    $newName = "Psycho Chibi NFT ($counter).png"
+    Rename-Item $_.FullName -NewName $newName -Force
+    $counter++
+}
