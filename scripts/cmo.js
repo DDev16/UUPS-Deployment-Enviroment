@@ -6,7 +6,7 @@ async function main() {
     const ownerAddress = "0x2546BcD3c84621e976D8185a91A922aE77ECEc30"; // The address that will deploy the contract
 
     // Deploying the initial ERC20 contract
-    const Box = await ethers.getContractFactory("ERC20V2");
+    const Box = await ethers.getContractFactory("PsychoGems");
     const box = await upgrades.deployProxy(Box, [ownerAddress], { initializer: "initialize" }, { kind: 'uups' });
     console.log("Deploying proxy contract for Test");
     await box.waitForDeployment();
@@ -17,7 +17,7 @@ async function main() {
     const nftContract = await upgrades.deployProxy(NFTV2, [box.address], { initializer: "initialize" }, { kind: "uups" });
     console.log("Deploying proxy contract for NFTV2");
     await nftContract.deployed();
-    console.log("NFT contract deployed to:", await nftContract.address);
+    console.log("NFT contract deployed to:", await nftContract.getAddress());
   } catch (error) {
     console.error("Error:", error);
   }

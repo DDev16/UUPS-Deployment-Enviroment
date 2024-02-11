@@ -7,7 +7,7 @@ async function main() {
 
   //Define address for the initial owner
 
-  const initialOwner = "0x908202958E91AFCD18DFd6Bac7551ED889188981";
+  const initialOwner = "0x2546BcD3c84621e976D8185a91A922aE77ECEc30";
 
   try {
     // Deploying the initial ERC20 contract
@@ -21,22 +21,22 @@ async function main() {
  
     
 
-    // const psychoChibisAddress = await PsychoChibis.getAddress();
+    const psychoChibisAddress = await PsychoChibis.getAddress();
 
 
-    // // Deploy the StakingContract as a UUPS upgradeable contract
-    // const StakingContract = await ethers.getContractFactory("ChaoticCreationsStaking");
-    // const stakingContract = await upgrades.deployProxy(StakingContract, [psychoGemsAddress, psychoChibisAddress, initialOwner], { initializer: 'initialize', kind: 'uups' });
+    // Deploy the StakingContract as a UUPS upgradeable contract
+    const StakingContract = await ethers.getContractFactory("ChaoticCreationsStaking");
+    const stakingContract = await upgrades.deployProxy(StakingContract, [psychoGemsAddress, psychoChibisAddress, initialOwner], { initializer: 'initialize', kind: 'uups' });
 
     // Wait for deployment completion
     await PsychoGems.waitForDeployment();
     await PsychoChibis.waitForDeployment();
-    // await stakingContract.waitForDeployment();
+    await stakingContract.waitForDeployment();
 
     // Log deployed addresses
     console.log("Psycho Gems deployed to:", await PsychoGems.getAddress());
     console.log("Psycho Chibis deployed to:", await PsychoChibis.getAddress());
-    // console.log("StakingContract deployed to:", await stakingContract.getAddress());
+    console.log("StakingContract deployed to:", await stakingContract.getAddress());
 
 
   } catch (error) {

@@ -25,16 +25,16 @@ module.exports = {
         // Add more accounts if needed
       ],
     },
+   
     songbird: {
       gas: "auto",
       gasPrice: "auto",
       gasMultiplier: 1,
-      url: "https://sgb.ftso.com.au/ext/bc/C/rpc",
-      chainId: 19,
-      accounts: [
-        process.env.REACT_APP_SECRET_KEY, // Account 0 private key
-      ],
+      url: "https://songbird-api.flare.network/ext/bc/C/rpc",
+      accounts: [process.env.REACT_APP_SECRET_KEY],
+      chainId: 19
     },
+  
     goerli: {
       gas: "auto",
       gasPrice: "auto",
@@ -45,5 +45,6 @@ module.exports = {
         process.env.REACT_APP_SECRET_KEY, // Account 0 private key
       ],
     },
+  
   },
 };

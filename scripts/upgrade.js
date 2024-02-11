@@ -1,6 +1,6 @@
 async function main() {
-  const proxyAddress = '0xa3055a9Ac1Be0f978d8DD860C9f20BcFe15BF120'; // Existing UUPS proxy address
-  const BoxV2 = await ethers.getContractFactory("PsychoChibis");
+  const proxyAddress = '0x3E3d396084bc8d84E6FBbBB7003eFB517E394Abd'; // Existing UUPS proxy address
+  const BoxV2 = await ethers.getContractFactory("ChaoticCreationsStaking");
 
   console.log("Preparing upgrade...");
 

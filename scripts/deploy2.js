@@ -1,7 +1,7 @@
 const { ethers, upgrades } = require("hardhat");
 
 async function main() {
-    const customTokenAddress = "0xa27bC320252d51EEAA24BCCF6cc003979E485860";
+    const customTokenAddress = "PsychoGems";
    
 
     const ChibiFactory = await ethers.getContractFactory("Chibifactory1");

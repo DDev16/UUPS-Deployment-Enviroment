@@ -62,6 +62,11 @@ contract PsychoChibis is Initializable, ERC721Upgradeable, ERC721EnumerableUpgra
     // Event to log referral rewards
     event ReferralReward(address indexed referrer, address indexed referee, uint256 tokens);
 
+    // New variables for presale logic
+    mapping(address => uint256) public presaleMintsPerWallet;
+    uint256 public constant PRESALE_FREE_LIMIT = 300;
+    uint256 public totalFreeMints;
+
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
         _disableInitializers();
@@ -90,6 +95,9 @@ contract PsychoChibis is Initializable, ERC721Upgradeable, ERC721EnumerableUpgra
         nftholderRewardPercentage = 15;
         psychoGemsToken = _psychoGemsToken; // Set the address of the Psycho Gems ERC20 token contract
         nonce = 0;
+        totalFreeMints = 0;
+        
+
     }
 
     // Constants for allocation percentages
@@ -153,6 +161,29 @@ contract PsychoChibis is Initializable, ERC721Upgradeable, ERC721EnumerableUpgra
     nonce++;
     return rand;
     
+}
+
+// Function to mint tokens directly to a specified address
+
+function mintToAddress(uint256 _mintAmount, address _recipient) public onlyOwner nonReentrant returns (bool) {
+    require(_mintAmount > 0, "Mint amount must be greater than 0");
+    require(_recipient != address(0), "Recipient address cannot be the zero address");
+    uint256 supply = totalSupply();
+    require(supply + _mintAmount <= maxSupply, "Minting would exceed the maximum supply");
+
+    for (uint256 i = 0; i < _mintAmount; i++) {
+        uint256 randTokenId = randomTokenId();
+        while (mintedTokenIds[randTokenId]) {
+            randTokenId = randomTokenId();
+        }
+        _safeMint(_recipient, randTokenId);
+        mintedTokenIds[randTokenId] = true;
+
+        // Construct and set the token URI for the minted token
+        string memory newTokenURI = string(abi.encodePacked(baseURI, uint256ToString(randTokenId), baseExtension));
+        _setTokenURI(randTokenId, newTokenURI);
+    }
+    return true;
 }
 
 

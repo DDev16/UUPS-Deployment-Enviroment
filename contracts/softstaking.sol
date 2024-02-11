@@ -33,10 +33,10 @@ contract ChaoticCreationsStaking is Initializable, OwnableUpgradeable, UUPSUpgra
 
         // Initialize tiers
         tiers.push(Tier(1, 1));  // Bronze
-        tiers.push(Tier(6, 2));  // Silver
-        tiers.push(Tier(11, 3)); // Gold
-        tiers.push(Tier(16, 4)); // Diamond
-        tiers.push(Tier(21, 5)); // Psycho
+        tiers.push(Tier(3, 2));  // Silver
+        tiers.push(Tier(5, 3)); // Gold
+        tiers.push(Tier(7, 4)); // Diamond
+        tiers.push(Tier(10, 5)); // Psycho
     }
 
     function _authorizeUpgrade(address newImplementation) internal override onlyOwner {}
@@ -62,7 +62,7 @@ contract ChaoticCreationsStaking is Initializable, OwnableUpgradeable, UUPSUpgra
         uint256 rewardMultiplier = tiers[tierIndex].rewardMultiplier;
 
         uint256 timeElapsed = block.timestamp - lastClaimed[msg.sender];
-        uint256 rewards = rewardPerSecond * timeElapsed * balance * rewardMultiplier;
+        uint256 rewards = rewardPerSecond * timeElapsed * rewardMultiplier;
 
         require(rewardsToken.balanceOf(address(this)) >= rewards, "Not enough tokens in the contract");
 
@@ -107,19 +107,20 @@ contract ChaoticCreationsStaking is Initializable, OwnableUpgradeable, UUPSUpgra
     if (balance < 1) {
         return 0; // No NFTs
     }
-    if (balance >= 1 && balance < 6) {
+    if (balance >= 1 && balance < 3) {
         return 1; // Tier 1
     }
-    if (balance >= 6 && balance < 11) {
+    if (balance >= 3 && balance < 5) {
         return 2; // Tier 2
     }
-    if (balance >= 11 && balance < 16) {
+    if (balance >= 5 && balance < 7) {
         return 3; // Tier 3
     }
-    if (balance >= 16 && balance < 21) {
+    if (balance >= 7 && balance < 10) {
         return 4; // Tier 4
     }
-    return 5; // Tier 5 and beyond
+       return 5; // Tier 5 and beyond
+    
 }
 
 

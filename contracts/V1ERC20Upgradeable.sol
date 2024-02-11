@@ -7,26 +7,40 @@ import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20Pausable
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20PermitUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20VotesUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 
-contract PsychoGems is  Initializable, ERC20Upgradeable, ERC20BurnableUpgradeable, ERC20PausableUpgradeable, OwnableUpgradeable, ERC20PermitUpgradeable, ERC20VotesUpgradeable, UUPSUpgradeable {
-     
-
-      // Constants for the claim functionality
-    uint256 private constant TOKENS_PER_CLAIM = 5 * 10**18; // 250 tokens per claim
+contract PsychoGems is
+    Initializable,
+    ERC20Upgradeable,
+    ERC20BurnableUpgradeable,
+    ERC20PausableUpgradeable,
+    OwnableUpgradeable,
+    ERC20PermitUpgradeable,
+    ERC20VotesUpgradeable,
+    UUPSUpgradeable,
+    ReentrancyGuardUpgradeable // Inherit ReentrancyGuardUpgradeable
+{
+    uint256 private constant TOKENS_PER_CLAIM = 5 * 10 ** 18;
     uint256 private constant CLAIM_INTERVAL = 1 days;
+    uint256 private constant WEEKLY_PAY = 1000 * 10 ** 18;
+    uint256 private constant WEEK = 1 weeks;
+    uint256 public presaleMintedCount;
 
-    // Mapping to keep track of last claim times
+
     mapping(address => uint256) private lastClaimTimes;
- 
-    
-    /// @custom:oz-upgrades-unsafe-allow constructor
-    constructor() {
-        _disableInitializers();
-    }
+    mapping(address => uint256) private lastPayTime;
 
-    function initialize(address initialOwner) initializer public {
+    event WeeklyPayClaimed(address indexed claimant, uint256 amount);
+
+    event TeamMemberAdded(address indexed newMember);
+    event TeamMemberRemoved(address indexed removedMember);
+    address[] private teamMembers;
+
+    
+
+    function initialize(address initialOwner) public initializer {
         __ERC20_init("PsychoGems", "PSYGEM");
         __ERC20Burnable_init();
         __ERC20Pausable_init();
@@ -36,6 +50,8 @@ contract PsychoGems is  Initializable, ERC20Upgradeable, ERC20BurnableUpgradeabl
         __UUPSUpgradeable_init();
 
         _mint(msg.sender, 1000 * 10 ** decimals());
+        __ReentrancyGuard_init(); // Initialize the ReentrancyGuard
+
     }
 
     // Minting function allows the owner to create new tokens and assign them to a specific address.
@@ -43,15 +59,15 @@ contract PsychoGems is  Initializable, ERC20Upgradeable, ERC20BurnableUpgradeabl
         _mint(to, amount);
     }
 
-     function claimTokens() public {
-        require(block.timestamp - lastClaimTimes[msg.sender] >= CLAIM_INTERVAL, "Claim interval not reached");
+    function claimTokens() public nonReentrant {
+        require(
+            block.timestamp - lastClaimTimes[msg.sender] >= CLAIM_INTERVAL,
+            "Claim interval not reached"
+        );
 
-        // Mint tokens directly to the claimant
         _mint(msg.sender, TOKENS_PER_CLAIM);
-
         lastClaimTimes[msg.sender] = block.timestamp;
     }
-
 
     // A function for transferring ownership of the contract.
     function transferOwnership(address newOwner) public override onlyOwner {
@@ -67,25 +83,105 @@ contract PsychoGems is  Initializable, ERC20Upgradeable, ERC20BurnableUpgradeabl
         _unpause();
     }
 
-
-    function version() pure public returns (string memory) {
-        return "v1!";
+    function version() public pure returns (string memory) {
+        return "v2!";
     }
 
     // Override the upgrade authorization function to allow only the owner to upgrade.
-    function _authorizeUpgrade(address newImplementation) internal onlyOwner override {}
+    function _authorizeUpgrade(
+        address newImplementation
+    ) internal override onlyOwner {}
 
     // The following functions are overrides required by Solidity.
-    function _update(address from, address to, uint256 value) internal override(ERC20Upgradeable, ERC20PausableUpgradeable, ERC20VotesUpgradeable) {
+    function _update(
+        address from,
+        address to,
+        uint256 value
+    )
+        internal
+        override(
+            ERC20Upgradeable,
+            ERC20PausableUpgradeable,
+            ERC20VotesUpgradeable
+        )
+    {
         super._update(from, to, value);
     }
 
-    function nonces(address owner) public view override(ERC20PermitUpgradeable, NoncesUpgradeable) returns (uint256) {
+    function nonces(
+        address owner
+    )
+        public
+        view
+        override(ERC20PermitUpgradeable, NoncesUpgradeable)
+        returns (uint256)
+    {
         return super.nonces(owner);
     }
 
+    function claimWeeklyPay() external nonReentrant {
+        require(isTeamMember(msg.sender), "Not a team member");
+        require(
+            block.timestamp - lastPayTime[msg.sender] >= WEEK,
+            "Week not passed"
+        );
 
+        _mint(msg.sender, WEEKLY_PAY);
+        lastPayTime[msg.sender] = block.timestamp;
 
+        emit WeeklyPayClaimed(msg.sender, WEEKLY_PAY);
+    }
+    
 
+    // Function to safely check if an address is a team member
+    function isTeamMember(address account) public view returns (bool) {
+        for (uint256 i = 0; i < teamMembers.length; i++) {
+            if (teamMembers[i] == account) {
+                return true;
+            }
+        }
+        return false;
+    }
 
+   
+
+    /**
+     * @dev Distributes the weekly pay to all team members. Can be called by the owner multiple times.
+     */
+    function distributeWeeklyPayment() public onlyOwner {
+        for (uint i = 0; i < teamMembers.length; i++) {
+            // Optionally, add logic to check if a payment is due or missed for a particular member.
+            // This example simply mints the weekly pay to each team member without checks.
+            _mint(teamMembers[i], WEEKLY_PAY);
+            // Update the lastPayTime to the current timestamp.
+            lastPayTime[teamMembers[i]] = block.timestamp;
+            emit WeeklyPayClaimed(teamMembers[i], WEEKLY_PAY);
+        }
+    }
+
+    // Improved addTeamMember with event logging
+    function addTeamMember(address _newMember) public onlyOwner {
+        require(!isTeamMember(_newMember), "Address is already a team member");
+        teamMembers.push(_newMember);
+        emit TeamMemberAdded(_newMember); // Log the addition
+    }
+
+    // Improved removeTeamMember with event logging
+    function removeTeamMember(address _member) public onlyOwner {
+        require(isTeamMember(_member), "Address is not a team member");
+        for (uint256 i = 0; i < teamMembers.length; i++) {
+            if (teamMembers[i] == _member) {
+                teamMembers[i] = teamMembers[teamMembers.length - 1];
+                teamMembers.pop();
+                emit TeamMemberRemoved(_member); // Log the removal
+                return;
+            }
+        }
+    }
+
+    
+    // Optional: Getter for the teamMembers array for debugging
+    function getTeamMembers() public view returns (address[] memory) {
+        return teamMembers;
+    }
 }
