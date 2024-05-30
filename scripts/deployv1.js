@@ -3,13 +3,13 @@ const { ethers, upgrades } = require("hardhat");
 async function main() {
   try {
     // Deploying the initial contract
-    const Box = await ethers.getContractFactory("NFTV1");
+    const Box = await ethers.getContractFactory("MarketingTesting");
 
-    const box = await upgrades.deployProxy(Box, ["0x2546BcD3c84621e976D8185a91A922aE77ECEc30"], { kind: 'uups' });
-    console.log("Deploying proxy contract for Test");
+    const box = await upgrades.deployProxy(Box, ["0x908202958E91AFCD18DFd6Bac7551ED889188981"], { kind: 'uups' });
+    console.log("Deploying marketing proxy contract for Test");
 
     await box.waitForDeployment();
-    console.log("Box deployed to:", await box.getAddress());
+    console.log("Marketing deployed to:", await box.getAddress());
 
 
   } catch (error) {

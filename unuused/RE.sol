@@ -1,149 +1,137 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.0;
+pragma solidity ^0.8.20;
 
-import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/access/AccessControl.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC1155/ERC1155Upgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC1155/extensions/ERC1155PausableUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC1155/extensions/ERC1155BurnableUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC1155/extensions/ERC1155SupplyUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 
-contract RealEstateToken is ERC721, Ownable, AccessControl {
-    struct Property {
-        string name;
-        string location;
-        uint256 price;
-        bool isForSale;
-        bool isForRent;
-        bool isInspected;
-        uint256 mortgageBalance;
+contract MyToken is Initializable, ERC1155Upgradeable, AccessControlUpgradeable, ERC1155PausableUpgradeable, ERC1155BurnableUpgradeable, ERC1155SupplyUpgradeable, UUPSUpgradeable {
+    bytes32 public constant URI_SETTER_ROLE = keccak256("URI_SETTER_ROLE");
+    bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
+    bytes32 public constant TREASURER_ROLE = keccak256("TREASURER_ROLE");
+    bytes32 public constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE");
+
+    uint256 private _currentTokenID;
+    mapping(uint256 => string) private _tokenURIs;
+    mapping(uint256 => uint256) public propertyShares;
+    mapping(uint256 => uint256) public sharePrice;  // Price per share for each property
+    mapping(uint256 => uint256) public rentalIncome;
+    mapping(uint256 => address) public propertyOwner;  // Tracks the owner of each property
+
+    event PropertyMinted(uint256 indexed propertyId, address indexed owner, uint256 shares, uint256 pricePerShare);
+    event TokenURIUpdated(uint256 indexed tokenId, string newURI);
+    event SharePriceSet(uint256 indexed tokenId, uint256 price);
+    event SharesListed(uint256 indexed tokenId, bool listed);
+    event SharesBought(address indexed buyer, address indexed seller, uint256 tokenId, uint256 shares, uint256 pricePerShare);
+    event SharesSold(address indexed seller, uint256 tokenId, uint256 shares);
+    event RentalPaymentReceived(uint256 tokenId, uint256 amount);
+    event DividendDistributed(address indexed shareholder, uint256 tokenId, uint256 amount);
+
+    /// @custom:oz-upgrades-unsafe-allow constructor
+    constructor() {
+        _disableInitializers();
     }
 
-    struct Mortgage {
-        uint256 amount;
-        uint256 installmentsRemaining;
-        uint256 installmentAmount;
+    function initialize(address admin)
+        initializer public
+    {
+        __ERC1155_init("https://api.realestate.com/tokens/");
+        __AccessControl_init();
+        __ERC1155Pausable_init();
+        __ERC1155Burnable_init();
+        __ERC1155Supply_init();
+        __UUPSUpgradeable_init();
+
+        _grantRole(DEFAULT_ADMIN_ROLE, admin);
+        _grantRole(URI_SETTER_ROLE, admin);
+        _grantRole(PAUSER_ROLE, admin);
+        _grantRole(TREASURER_ROLE, admin);
+        _grantRole(UPGRADER_ROLE, admin);
+
+        _currentTokenID = 1;  // Set the initial value in the initializer
     }
 
-    struct LeaseAgreement {
-        uint256 rentalPeriod;
-        uint256 monthlyRent;
-        uint256 deposit;
-        address renter;
-        bool isActive;
+    function mintProperty(uint256 shares, uint256 price, string memory uri) public {
+        uint256 newItemId = _currentTokenID++;
+        _mint(msg.sender, newItemId, shares, "");
+        _tokenURIs[newItemId] = uri;
+        propertyShares[newItemId] = shares;
+        sharePrice[newItemId] = price;
+        propertyOwner[newItemId] = msg.sender;  // Set the property owner
+
+        emit PropertyMinted(newItemId, msg.sender, shares, price);
+        emit TokenURIUpdated(newItemId, uri);
     }
 
-    bytes32 public constant REAL_ESTATE_AGENT_ROLE = keccak256("REAL_ESTATE_AGENT_ROLE");
-    uint256 public nextTokenId;
-    mapping(uint256 => Property) public properties;
-    mapping(uint256 => address[]) public propertyOwnershipHistory;
-    mapping(uint256 => Mortgage) public propertyMortgages;
-    mapping(uint256 => LeaseAgreement) public propertyLeases;
-    mapping(uint256 => uint256) public escrowBalances;
-    mapping(uint256 => bool) public propertyDisputes;
-
-    event PropertyListedForSale(uint256 indexed tokenId, uint256 price);
-    event PropertySold(uint256 indexed tokenId, address indexed newOwner);
-    event MortgageCreated(uint256 indexed tokenId, uint256 amount, uint256 installments);
-    event LeaseCreated(uint256 indexed tokenId, uint256 rentalPeriod, uint256 monthlyRent);
-    event PropertyInspected(uint256 indexed tokenId);
-    event DisputeResolved(uint256 indexed tokenId);
-    event ListedByAgent(uint256 indexed tokenId, address indexed agent);
-
-    constructor() ERC721('RealEstateToken', 'RET') {
-        _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
+    function listShares(uint256 tokenId, bool listed) public {
+        require(msg.sender == propertyOwner[tokenId], "Only the property owner can list shares.");
+        sharePrice[tokenId] = sharePrice[tokenId];  // Confirm the share price
+        emit SharesListed(tokenId, listed);
     }
 
-    function registerProperty(string memory name, string memory location, uint256 price) public onlyOwner {
-        uint256 tokenId = nextTokenId++;
-        properties[tokenId] = Property(name, location, price, false, false, false, 0);
-        _safeMint(msg.sender, tokenId);
-        propertyOwnershipHistory[tokenId].push(msg.sender);
+    function buyShares(uint256 tokenId, uint256 shares) public payable {
+        require(sharePrice[tokenId] > 0, "Shares not listed for sale.");
+        require(msg.value == shares * sharePrice[tokenId], "Incorrect Ether amount sent.");
+        address seller = propertyOwner[tokenId];
+        require(seller != msg.sender, "Cannot buy shares from yourself.");
+
+        _safeTransferFrom(seller, msg.sender, tokenId, shares, "");
+        payable(seller).transfer(msg.value);
+        emit SharesBought(msg.sender, seller, tokenId, shares, sharePrice[tokenId]);
     }
 
-    function listPropertyForSale(uint256 tokenId, uint256 price) public {
-        require(ownerOf(tokenId) == msg.sender, "Only the owner can sell the property");
-        properties[tokenId].isForSale = true;
-        properties[tokenId].price = price;
-        emit PropertyListedForSale(tokenId, price);
+    function receiveRentalPayment(uint256 tokenId) public payable {
+        require(propertyShares[tokenId] > 0, "No shares issued for this token.");
+        rentalIncome[tokenId] += msg.value;
+        emit RentalPaymentReceived(tokenId, msg.value);
     }
 
-    function buyProperty(uint256 tokenId) public payable {
-        require(properties[tokenId].isForSale, "Property is not for sale");
-        require(properties[tokenId].isInspected, "Property has not been inspected");
-        require(msg.value == properties[tokenId].price, "Incorrect price paid");
-        properties[tokenId].isForSale = false;
-        address seller = ownerOf(tokenId);
-        _transfer(seller, msg.sender, tokenId);
-        propertyOwnershipHistory[tokenId].push(msg.sender);
-        releaseEscrow(tokenId, seller);
-        emit PropertySold(tokenId, msg.sender);
+    function distributeDividends(uint256 tokenId) public {
+        require(msg.sender == propertyOwner[tokenId], "Only the owner can distribute dividends.");
+        uint256 totalDividend = rentalIncome[tokenId];
+        require(totalDividend > 0, "No rental income to distribute.");
+
+        uint256 totalShares = propertyShares[tokenId];
+        uint256 dividendPerShare = totalDividend / totalShares;
+
+        // Assumes the property owner distributes dividends fairly
+        for (uint256 i = 0; i < totalShares; i++) {
+            address holder = propertyOwner[tokenId];
+            payable(holder).transfer(dividendPerShare * balanceOf(holder, tokenId));
+            emit DividendDistributed(holder, tokenId, dividendPerShare * balanceOf(holder, tokenId));
+        }
+
+        rentalIncome[tokenId] = 0;  // Reset rental income after distribution
     }
 
-    function createMortgage(uint256 tokenId, uint256 amount, uint256 installments, uint256 installmentAmount) public {
-        require(ownerOf(tokenId) == msg.sender, "Only the owner can create a mortgage");
-        propertyMortgages[tokenId] = Mortgage(amount, installments, installmentAmount);
-        emit MortgageCreated(tokenId, amount, installments);
+    function _authorizeUpgrade(address newImplementation)
+        internal
+        onlyRole(UPGRADER_ROLE)
+        override
+    {}
+
+   
+
+     // The following functions are overrides required by Solidity.
+
+    function _update(address from, address to, uint256[] memory ids, uint256[] memory values)
+        internal
+        override(ERC1155Upgradeable, ERC1155PausableUpgradeable, ERC1155SupplyUpgradeable)
+    {
+        super._update(from, to, ids, values);
     }
 
-    function payMortgageInstallment(uint256 tokenId) public payable {
-        Mortgage storage mortgage = propertyMortgages[tokenId];
-        require(mortgage.installmentsRemaining > 0, "Mortgage already paid off");
-        require(msg.value == mortgage.installmentAmount, "Incorrect installment amount");
-        mortgage.amount -= msg.value;
-        mortgage.installmentsRemaining--;
-        address owner = ownerOf(tokenId);
-        payable(owner).transfer(msg.value);
-    }
 
-    function createLeaseAgreement(uint256 tokenId, uint256 rentalPeriod, uint256 monthlyRent, uint256 deposit) public {
-        require(ownerOf(tokenId) == msg.sender, "Only the owner can create a lease agreement");
-        propertyLeases[tokenId] = LeaseAgreement(rentalPeriod, monthlyRent, deposit, address(0), false);
-        emit LeaseCreated(tokenId, rentalPeriod, monthlyRent);
-    }
-
-    function signLeaseAgreement(uint256 tokenId) public payable {
-        LeaseAgreement storage lease = propertyLeases[tokenId];
-        require(msg.value == lease.deposit, "Incorrect deposit amount");
-        lease.renter = msg.sender;
-        lease.isActive = true;
-        depositToEscrow(tokenId);
-    }
-
-    function assignAgent(address agent) public onlyOwner {
-        _setupRole(REAL_ESTATE_AGENT_ROLE, agent);
-    }
-
-    function listPropertyByAgent(uint256 tokenId, uint256 price) public {
-        require(hasRole(REAL_ESTATE_AGENT_ROLE, msg.sender), "Caller is not a real estate agent");
-        properties[tokenId].isForSale = true;
-        properties[tokenId].price = price;
-        emit ListedByAgent(tokenId, msg.sender);
-    }
-
-    function inspectProperty(uint256 tokenId) public {
-        require(hasRole(REAL_ESTATE_AGENT_ROLE, msg.sender) || msg.sender == ownerOf(tokenId), "Unauthorized");
-        properties[tokenId].isInspected = true;
-        emit PropertyInspected(tokenId);
-    }
-
-    function resolveDispute(uint256 tokenId) public onlyOwner {
-        propertyDisputes[tokenId] = false;
-        emit DisputeResolved(tokenId);
-    }
-
-    function depositToEscrow(uint256 tokenId) public payable {
-        escrowBalances[tokenId] += msg.value;
-    }
-
-    function releaseEscrow(uint256 tokenId, address to) public onlyOwner {
-        require(propertyDisputes[tokenId] == false, "Dispute in progress");
-        uint256 amount = escrowBalances[tokenId];
-        escrowBalances[tokenId] = 0;
-        payable(to).transfer(amount);
-    }
-
-     /**
-     * @dev See {IERC165-supportsInterface}.
-     */
-    function supportsInterface(bytes4 interfaceId) public view virtual override(ERC721, AccessControl) returns (bool) {
-        return ERC721.supportsInterface(interfaceId) || AccessControl.supportsInterface(interfaceId);
+    function supportsInterface(bytes4 interfaceId)
+        public
+        view
+        override(ERC1155Upgradeable, AccessControlUpgradeable)
+        returns (bool)
+    {
+        return super.supportsInterface(interfaceId);
     }
 }

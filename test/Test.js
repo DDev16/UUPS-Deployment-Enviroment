@@ -1,84 +1,38 @@
 const { expect } = require("chai");
-const { ethers } = require("hardhat");
+const { ethers, upgrades } = require("hardhat");
 
-describe("ChaoticCreationsStaking", function () {
-    let owner, user1, user2, rewardsToken, nftCollection, stakingContract;
+describe("Deployment and Interaction Simulation", function () {
+  let deployer, initialOwner;
+  let psychoGems, psychoChibis, stakingContract;
 
-    beforeEach(async function () {
-        [owner, user1, user2] = await ethers.getSigners();
+  before(async function () {
+    [deployer, initialOwner] = await ethers.getSigners();
+    console.log("Deploying All Contracts with account:", deployer.address);
 
-        // Deploy mock contracts for IERC20 and ERC721EnumerableUpgradeable
+    // Deploying PsychoGems (ERC20)
+    const ERC20 = await ethers.getContractFactory("PsychoGems");
+    psychoGems = await upgrades.deployProxy(ERC20, [initialOwner.address], { initializer: 'initialize', kind: 'uups' });
+    console.log("Psycho Gems deployed to:", psychoGems.address);
 
-        // Deploy ChaoticCreationsStaking and initialize
-    });
+    // Deploying PsychoChibis (ERC721)
+    const ERC721 = await ethers.getContractFactory("PsychoChibis");
+    psychoChibis = await upgrades.deployProxy(ERC721, [initialOwner.address, psychoGems.address], { initializer: 'initialize', kind: 'uups' });
+    console.log("Psycho Chibis deployed to:", psychoChibis.address);
 
-    describe("Initialization", function () {
-        it("should initialize with correct values", async function () {
-            // Test initialization values
-        });
-    });
+    // Deploy the StakingContract as a UUPS upgradeable contract
+    const StakingContract = await ethers.getContractFactory("ChaoticCreationsStaking");
+    stakingContract = await upgrades.deployProxy(StakingContract, [psychoGems.address, psychoChibis.address, initialOwner.address], { initializer: 'initialize', kind: 'uups' });
+  });
 
-    describe("onBoardUser", function () {
-        it("should onboard a user with at least one NFT", async function () {
-            // Test successful onboarding
-        });
+  it("Should have deployed all contracts correctly", async function () {
+    expect(psychoGems.address).to.be.properAddress;
+    expect(psychoChibis.address).to.be.properAddress;
+    expect(stakingContract.address).to.be.properAddress;
 
-        it("should fail to onboard a user with no NFTs", async function () {
-            // Test failure when no NFTs
-        });
-    });
+    console.log("Psycho Gems deployed to:", psychoGems.address);
+    console.log("Psycho Chibis deployed to:", psychoChibis.address);
+    console.log("StakingContract deployed to:", stakingContract.address);
+  });
 
-    describe("claimRewards", function () {
-        it("should allow users to claim rewards", async function () {
-            // Test successful claim
-        });
-
-        it("should fail for users with no NFTs", async function () {
-            // Test failure when no NFTs
-        });
-
-        it("should calculate rewards correctly based on tier", async function () {
-            // Test reward calculation for different tiers
-        });
-
-        it("should fail if the contract has insufficient rewards", async function () {
-            // Test failure when contract has insufficient rewards
-        });
-    });
-
-    describe("depositRewards", function () {
-        it("should allow the owner to deposit rewards", async function () {
-            // Test successful deposit by owner
-        });
-
-        it("should prevent non-owners from depositing rewards", async function () {
-            // Test failure by non-owner
-        });
-    });
-
-    describe("withdrawRewards", function () {
-        it("should allow the owner to withdraw rewards", async function () {
-            // Test successful withdrawal by owner
-        });
-
-        it("should prevent withdrawal of more than available balance", async function () {
-            // Test failure when withdrawing more than balance
-        });
-    });
-
-    describe("Tier Management", function () {
-        it("should allow owner to update tiers", async function () {
-            // Test successful tier update by owner
-        });
-
-        it("should prevent non-owners from updating tiers", async function () {
-            // Test failure by non-owner
-        });
-
-        it("should correctly assign tiers to users based on NFT count", async function () {
-            // Test tier assignment logic
-        });
-    });
-
-    // Additional tests...
+  // Add more tests here to interact with your deployed contracts
 });

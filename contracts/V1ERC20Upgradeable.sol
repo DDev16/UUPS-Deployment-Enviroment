@@ -79,6 +79,13 @@ contract PsychoGems is
         _pause();
     }
 
+    // Function to withdraw Ether from the contract to the owner's address
+function withdrawEther(uint256 amount) public onlyOwner {
+    require(address(this).balance >= amount, "Insufficient balance");
+    payable(owner()).transfer(amount);
+}
+
+
     function unpause() public onlyOwner {
         _unpause();
     }

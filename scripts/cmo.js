@@ -10,6 +10,7 @@ async function main() {
     const box = await upgrades.deployProxy(Box, [ownerAddress], { initializer: "initialize" }, { kind: 'uups' });
     console.log("Deploying proxy contract for Test");
     await box.waitForDeployment();
+    
     console.log("Box deployed to:", await box.getAddress());
 
     // Deploying the NFT contract with the ERC20V2 address
